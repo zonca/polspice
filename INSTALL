@@ -1,0 +1,181 @@
+
+PolSpice installation  v03-07-00  (2020-10-16)
+=====================
+
+background: 
+----------
+see HISTORY 
+
+usage:
+-----
+see README
+
+required libraries:
+------------------
+	- Healpix 3.60+        (https://healpix.sourceforge.io)
+
+	- cfitsio 3.20+ (3.44+ recommended, 
+                               https://heasarc.nasa.gov/fitsio/fitsio.html)
+
+installation:
+------------
+
+Two different installation procedures are available
+
+ 1) with standard hand-edited Makefile(s)
+    requiring GNU 'make', and some basic knowledge of 'make' syntax.
+    In ideal cases, it looks like
+    	cd src
+	cp Makefile_template Makefile
+    	hand edit the Makefile
+    	make
+    	cd ..
+
+ 2) with cmake generated Makefile(s)     <<< introduced in spice 3.5.1
+    requiring 'cmake' (version 3.7 or more), 
+    and any 'make'.
+    In ideal cases, it looks like
+	mkdir build
+	cd build
+	cmake ..
+	make
+	cd ..
+	
+Non-ideal cases in each procedure are studied below.
+
+  Both procedures will write the intermediate object files (*.o)
+  into a 'build' directory, and copy the final executable (spice)
+  and the IDL and python routines into a ./bin directory 
+  (created automatically).
+  
+  By default, both procedures will generate an executable using
+  double precision variables to store the maps and alm coefficients,
+  in order to improve the accuracy and stability of the results
+  (at the cost of larger memory footprint and longer execution time),
+  see http://www2.iap.fr/users/hivon/software/PolSpice/faq.html .
+  To revert to the single precision used in version 3.4.1 and below,
+  set DOUBLE=0, as indicated below.
+
+
+1) Compilation with standard Makefile
+   - - - - - - - - - - - - - - - - - 
+
+ a) cd src
+
+ b) create a Makefile adapted to your 
+   compiler and system configuration,
+   using Makefile_template as a template.
+   *** Make sure that each file ending with .F90
+   is preprocessed (with cpp or fpp) before compilation ***
+
+   * If the command pkg-config is available on your system,
+   keep USEPKGCONFIG to 1 in the Makefile, 
+   and only provide the F90 and C compiler names
+   (so, the only 2 lines to edit will look like, for instance
+FC = gfortran
+CC = gcc
+   )
+
+   * If pkg-config is NOT available, then more information will
+   have to be provided, in particular the one related to cfitsio:
+  
+      If the environment variable HEALPIX is properly set,
+      only the libcfitsio location has to be added 
+      (by editing the variable  FITSLIB  in Makefile_template)
+   
+      Note that recent versions of cfitsio (3.42 and more)
+      might have been compiled with dynamic linking to libcurl.
+      If that is the case, it may be necessary to set
+      OTHERLIBS = -lcurl
+      in the Makefile_template
+   
+   By default DOUBLE=1 (double precision variables or DP).
+   Set
+   DOUBLE = 0     
+   in Makefile_template to revert to single precision (SP) variables.
+   You also run 'make DOUBLE=0' or 'make DOUBLE=1' to choose 
+   respectively SP or DP compilation.
+   
+   If you are not sure whether single or double precision 
+   is right for you, the command
+   'make both'
+   will create both (bin/spice_SP and bin/spice_DP) simultaneously,
+   so you can compare their performances on your data.
+ 
+
+ c) make
+   or 
+    make -j
+  (with GNU make)
+
+ d) cd ..
+   and  read the README before using bin/spice
+    or do
+   bin/spice -help
+
+ e) For cleaning up:
+    make clean 
+   will remove the build directory, while
+    make tidy
+   will remove the build and bin directories.
+
+
+2) Compilation using cmake
+   - - - - - - - - - - - -
+  
+ a) mkdir build ; cd build
+
+ b) cmake ..
+
+   cmake will try to guess the fortran compiler to use.
+   It can also be set with the FC environment variable, or by
+   adding -DCMAKE_Fortran_COMPILER=<compiler> to 'cmake ..'
+
+   cmake will try to guess the C compiler to use.
+   It can also be set with the CC environment variable, or by
+   adding -DCMAKE_C_COMPILER=<compiler> to 'cmake ..'
+  
+   So, for instance
+   cmake .. -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc
+   could be enough
+
+   * If the environment variable HEALPIX is not set,
+   it may be necessary to do
+    cmake ..  -DHEALPIX=<path_to_healpix>
+   or
+    cmake .. -DHEALPIX_LIB=<path_to_healpix_lib> -DHEALPIX_INCLUDE=<path_to_healpix_include>
+   or
+    cmake .. -DHEALPIX=<path_to_healpix> -DSUFFIX=<directories_suffix>
+    (if Healpix was installed in <HEALPIX>/lib<SUFFIX> and <HEALPIX>/include<SUFFIX>)
+   instead
+  
+   * If libcfitsio is not at a traditional location (like /usr/local/lib),
+   it may be necessary to add -DCFITSIO=<path_to_cfitsio_directory> to the 'cmake .. ' command
+  
+   CMake will look for libcurl on its own (using the curl-config command),
+   otherwise -DCURL=<path_to_libcurl> can be added to the 'cmake .. ' command to specify its location
+  
+   To revert to single precision variables add
+    -DDOUBLE=OFF   (or -DDOUBLE=0)  to the 'cmake .. ' command
+
+
+ c) make
+  or 
+   make -j 4
+ (with BSD or GNU make)
+
+ d) cd ..
+   and  read the README
+    or do
+   bin/spice -help
+
+ e) For cleaning up:
+   in the build/ directory
+   make clean
+    will remove the compilation output from the build directory (leaving the cmake* files in place)
+   make vclean
+    will empty the build directory
+   make tidy
+    will empty the build directory and remove the bin directory
+
+

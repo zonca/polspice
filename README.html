@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en"> 
+      <head>
+      <meta charset="utf-8">
+      <title>PolSpice README</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>
+         .center { text-align: center;}
+      </style>
+      <!-- HTML file generated with ./tests/txt2html.sh -->
+      </head>
+<body>
+<a id="TOC"></a>
+<h1 class="center"><a href="http://www2.iap.fr/users/hivon/software/PolSpice">PolSpice</a> README</h1>
+<h3 class="center">v03-07-00 (16 Oct 2020)</h3>
+<h2 class="center">
+    <a href="#Installation">Installation</a><br>
+    <a href="#StandardUsage">Standard Usage</a><br>
+    <a href="#ListOfKeywords">List of Keywords</a><br>
+    <a href="#ImportantNote">Important Note</a><br>
+    <a href="#Examples"     >Examples</a><br>
+    <a href="#Example"      >Example of Options Input File</a><br>
+</h2>
+<hr>
+<br>
+<a id="Installation">INSTALLATION</a> : <br>
+&nbsp;&nbsp;See the file named <a href="http://www2.iap.fr/users/hivon/software/PolSpice/INSTALL">INSTALL</a> in the top directory <br>
+  <br>
+<br><p class="center"><a href="#TOC">Back to TOC</a></p><br><a id="StandardUsage">STANDARD USAGE</a> : <br>
+&nbsp;&nbsp;spice [-keyword(1) parameter(1) ... -keyword(N) parameter(N)] <br>
+&nbsp;&nbsp;&nbsp;&nbsp;   [<a href="#optinfile">-<kbd>optinfile</kbd></a> parameter_file]<br>
+  <br>
+&nbsp;&nbsp;All keywords are optional<br>
+  <br>
+ Format of parameter_file :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;        keyword = parameter<br>
+&nbsp;&nbsp;&nbsp;&nbsp; see <a href="#Example">example</a> below<br>
+<br>
+<br><p class="center"><a href="#TOC">Back to TOC</a></p><br><a id="ListOfKeywords">LIST OF KEYWORDS</a> :     keyword [possible parameters](default)<br>
+<br>
+-<a id="about"><span style="font-size:larger"><strong><kbd>about</kbd></strong></span></a><br>
+&nbsp;&nbsp;print copyright info and stop<br>
+<br>
+-<a id="alm1fileout"><span style="font-size:larger"><strong><kbd>alm1fileout</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;FITS file containing a_lm coefficients of (masked and weighted) map1<br>
+&nbsp;&nbsp;NO desactivates output of the alm<br>
+&nbsp;&nbsp;YES activates output of the alm into <i>alm1.fits</i><br>
+<br>
+-<a id="alm2fileout"><span style="font-size:larger"><strong><kbd>alm2fileout</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;FITS file containing a_lm coefficients of (masked and weighted) map2<br>
+&nbsp;&nbsp;NO desactivates output of the alm<br>
+&nbsp;&nbsp;YES activates output of the alm into <i>alm1.fits</i><br>
+<br>
+-<a id="apodizesigma"><span style="font-size:larger"><strong><kbd>apodizesigma</kbd></strong></span></a> [dfloat|NO](NO)<br>
+&nbsp;&nbsp;scale factor in DEGREES of the correlation function tappering,<br>
+&nbsp;&nbsp;see option <a href="#apodizetype">-<kbd>apodizetype</kbd></a>.<br>
+&nbsp;&nbsp;For better results, <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a> should be close to <a href="#thetamax">-<kbd>thetamax</kbd></a>.<br>
+&nbsp;&nbsp;NO desactivates apodization.<br>
+&nbsp;&nbsp;NOTE : if noise subtraction is active (options <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or<br>
+&nbsp;&nbsp;<a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>), the input noise data are assumed to be already apodized.<br>
+<br>
+-<a id="apodizetype"><span style="font-size:larger"><strong><kbd>apodizetype</kbd></strong></span></a> [int](0)<br>
+&nbsp;&nbsp;type of apodization<br>
+&nbsp;&nbsp;0: the correlation function is multiplied by a gaussian window<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(equal to 1    at theta=0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; equal to 0.5  at theta= <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>/2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; equal to 1/16 at theta= <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>).<br>
+&nbsp;&nbsp;1: the correlation function is multiplied by a cosine window <br>
+&nbsp;&nbsp;&nbsp;&nbsp;(equal to 1   at theta=0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; equal to 0.5 at theta= <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>/2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; equal to 0   at theta= <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>).<br>
+<br>
+-<a id="beam"><span style="font-size:larger"><strong><kbd>beam</kbd></strong></span></a> [dfloat|NO](NO)<br>
+&nbsp;&nbsp;gaussian beam FWHM (arcmin) for map 1.<br>
+&nbsp;&nbsp;If specified, output c_l and c_theta are corrected for it<br>
+&nbsp;&nbsp;NOTE : if noise subtraction is active (options <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or<br>
+&nbsp;&nbsp;<a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>), the input noise data are assumed to be already corrected<br>
+&nbsp;&nbsp;for the beam<br>
+<br>
+-<a id="beam_file"><span style="font-size:larger"><strong><kbd>beam_file</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;beam window function for map 1.<br>
+&nbsp;&nbsp;If specified, output c_l and c_theta are corrected for it<br>
+&nbsp;&nbsp;The file should be plain ASCII with 2 columns : l and B(l) <br>
+&nbsp;&nbsp;or FITS (ASCII or BINARY) table containing B(l) starting at l=0<br>
+&nbsp;&nbsp;(B(l) is sqrt of beam power spectrum).<br>
+&nbsp;&nbsp;This over-rules the gaussian correction described by beam.<br>
+&nbsp;&nbsp;NO will not read any beam_file (but a gaussian<br>
+&nbsp;&nbsp;&nbsp;&nbsp;correction may be performed if <a href="#beam">-<kbd>beam</kbd></a> is set).<br>
+&nbsp;&nbsp;NOTE : if noise subtraction is active (options <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or<br>
+&nbsp;&nbsp;<a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>), the input noise data are assumed to be already corrected<br>
+&nbsp;&nbsp;for the beam.<br>
+&nbsp;&nbsp;Starting with version 2.90 and if linked with HEALPix 3.10+<br>
+&nbsp;&nbsp;<i>file.fits</i>[extname] means extension 'extname' of <i>file.fits</i><br>
+<br>
+-<a id="beam2"><span style="font-size:larger"><strong><kbd>beam2</kbd></strong></span></a> [dfloat|NO](NO)<br>
+&nbsp;&nbsp;gaussian beam FWHM (arcmin) for map 2 (if applicable).<br>
+&nbsp;&nbsp;(see beam)<br>
+  Note: if the second beam is the same as the first one,<br>
+&nbsp;&nbsp;then <a href="#beam2">-<kbd>beam2</kbd></a> should be explicitely given the same value as <a href="#beam">-<kbd>beam</kbd></a><br>
+<br>
+-<a id="beam_file2"><span style="font-size:larger"><strong><kbd>beam_file2</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;beam window function for map 2 (if applicable).<br>
+&nbsp;&nbsp;If specified, output c_l and c_theta are corrected for it<br>
+&nbsp;&nbsp;The file should be plain ASCII with 2 columns : l and B(l) <br>
+&nbsp;&nbsp;or FITS (ASCII or BINARY) table containing B(l) starting at l=0<br>
+&nbsp;&nbsp;(B(l) is sqrt of beam power spectrum).<br>
+&nbsp;&nbsp;This over-rules the gaussian correction described by <a href="#beam2">-<kbd>beam2</kbd></a>.<br>
+&nbsp;&nbsp;NO will not read any <a href="#beam_file2">-<kbd>beam_file2</kbd></a> (but a gaussian<br>
+&nbsp;&nbsp;&nbsp;&nbsp;correction may be performed if <a href="#beam2">-<kbd>beam2</kbd></a> is set.<br>
+&nbsp;&nbsp;NOTE : if noise subtraction is active (options <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or<br>
+&nbsp;&nbsp;<a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>), the input noise data are assumed to be already corrected<br>
+&nbsp;&nbsp;for the beam.<br>
+  Note: if the second beam is the same as the first one,<br>
+&nbsp;&nbsp;then <a href="#beam_file2">-<kbd>beam_file2</kbd></a> should be explicitely given the same value as <a href="#beam_file">-<kbd>beam_file</kbd></a><br>
+<br>
+-<a id="clfile"><span style="font-size:larger"><strong><kbd>clfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of output file for Cl<br>
+&nbsp;&nbsp;YES activates Cl file output with name <i>spice.cl</i><br>
+&nbsp;&nbsp;NO desactivates output of Cl file<br>
+&nbsp;&nbsp;NOTE : the current format of this file is a two columns array<br>
+&nbsp;&nbsp;the first one corresponding to the value of l, the second one<br>
+&nbsp;&nbsp;to the temperature Cl and, if polarization is activated, five<br>
+&nbsp;&nbsp;additional spectra corresponding to EE, BB, TE, TB, EB <br>
+&nbsp;&nbsp;and optionally ET, BT, BE are also written.<br>
+<br>
+-<a id="cl_inmap_file"><span style="font-size:larger"><strong><kbd>cl_inmap_file</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of input file containing the raw Cls of the map as obtained by<br>
+&nbsp;&nbsp;running previously SpICE with the option <a href="#cl_outmap_file">-<kbd>cl_outmap_file</kbd></a>.<br>
+&nbsp;&nbsp;If this option is active, it is not necessary anymore to read the input<br>
+&nbsp;&nbsp;map file, and option <a href="#cl_outmap_file">-<kbd>cl_outmap_file</kbd></a> is of course inactive.<br>
+&nbsp;&nbsp;YES reads the map raw Cls from file <i>spice.clrawmap</i><br>
+&nbsp;&nbsp;NO computes the raw Cl directly from the map.<br>
+&nbsp;&nbsp;IMPORTANT NOTE : the cls computed that way can be affected by the nature<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of the masks and/or the weights. If the masks/weights are changed,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the calculation will become inconsistent.<br>
+<br>
+-<a id="cl_inmask_file"><span style="font-size:larger"><strong><kbd>cl_inmask_file</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of input file containing the raw Cl of the weight/masks as<br>
+&nbsp;&nbsp;obtained by running previously SpICE with the option <a href="#cl_outmask_file">-<kbd>cl_outmask_file</kbd></a>.<br>
+&nbsp;&nbsp;If option <a href="#cl_inmask_file">-<kbd>cl_inmask_file</kbd></a> is active, the Cls of the masks are not computed,<br>
+&nbsp;&nbsp;they are directly read in file specified by cl_inmask_file and option<br>
+&nbsp;&nbsp;<a href="#cl_outmask_file">-<kbd>cl_outmask_file</kbd></a> is of course inactive.<br>
+&nbsp;&nbsp;With option <a href="#cl_inmask_file">-<kbd>cl_inmask_file</kbd></a> active, it is in principle not necessary<br>
+&nbsp;&nbsp;to read masks nor weights, but if masks/weights are not read, it means<br>
+&nbsp;&nbsp;that the input map is supposed to have been processed prior to using spice,<br>
+&nbsp;&nbsp;i.e. it has been multiplied by the masks/weights already.<br>
+&nbsp;&nbsp;YES reads the weights/mask raw Cls from file <i>spice.clrawmasks</i><br>
+&nbsp;&nbsp;NO computes the raw Cl directly from the weights/masks.<br>
+&nbsp;&nbsp;IMPORTANT NOTE : the cls computed for the map are affected by the nature<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of the masks and/or the weights. If the masks/weights are changed,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the calculation will become inconsistent.<br>
+<br>
+-<a id="cl_outmap_file"><span style="font-size:larger"><strong><kbd>cl_outmap_file</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of output file containing the raw Cls of the map. This can be<br>
+&nbsp;&nbsp;convenient in order to run SpICE with different parameters, without<br>
+&nbsp;&nbsp;having to recompute these raw Cls.<br>
+&nbsp;&nbsp;YES activates map raw Cls output with name <i>spice.clrawmap</i><br>
+&nbsp;&nbsp;NO desactivates output of map raw Cls file.<br>
+<br>
+-<a id="cl_outmask_file"><span style="font-size:larger"><strong><kbd>cl_outmask_file</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of output file containing the raw Cls of the weights/masks.<br>
+&nbsp;&nbsp;This can be convenient in order to run SpICE with different parameters,<br>
+&nbsp;&nbsp;without having to recompute these raw Cls.<br>
+&nbsp;&nbsp;YES activates mask raw Cls output with name <i>spice.clrawmasks</i><br>
+&nbsp;&nbsp;NO desactivates output of mask raw Cls file.<br>
+<br>
+-<a id="corfile"><span style="font-size:larger"><strong><kbd>corfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of output correlation file<br>
+&nbsp;&nbsp;YES activates correlation file output with name <i>spice.cor</i><br>
+&nbsp;&nbsp;NO desactivates output of correlation file<br>
+&nbsp;&nbsp;NOTE : the current format of this file is a three columns array<br>
+&nbsp;&nbsp;the first one corresponding to the separation theta in radians<br>
+&nbsp;&nbsp;the second one to cos(theta), the third one to the correlation<br>
+&nbsp;&nbsp;function of the temperature and, if polarization is activated,<br>
+&nbsp;&nbsp;five additional columns are written, corresponding respectively to<br>
+&nbsp;&nbsp;QQ, UU, TQ, TU and QU in the coupled case and to EE, BB, TQ, TU and QU<br>
+&nbsp;&nbsp;in the decoupled case (see option <a href="#decouple">-<kbd>decouple</kbd></a> and <a href="#symmetric_cl">-<kbd>symmetric_cl</kbd></a>).<br>
+<br>
+-<a id="covfileout"><span style="font-size:larger"><strong><kbd>covfileout</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;Computes and ouputs the TT C(l) covariance matrices <br>
+&nbsp;&nbsp;  These matrices are not needed by the code and are provided for <br>
+&nbsp;&nbsp;eg, cosmological interpretation of the result.<br>
+&nbsp;&nbsp;YES activates output of the cov. matrices in default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;FITS file <i>spice.covariance</i><br>
+&nbsp;&nbsp;NO desactivates output of the matrices<br>
+<br>
+-<a id="decouple"><span style="font-size:larger"><strong><kbd>decouple</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;computes the decoupled correlation functions<br>
+&nbsp;&nbsp;by an integral over QQ and UU correlation functions in angle space.<br>
+&nbsp;&nbsp;NOTE : this option is active only if <a href="#polarization">-<kbd>polarization</kbd></a>=YES,<br>
+&nbsp;&nbsp;otherwise it is ignored (see also <a href="#tolerance">-<kbd>tolerance</kbd></a>).<br>
+&nbsp;&nbsp;YES activates decoupling :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Correlation functions computed are : TT, EE, BB, TQ, TU, QU, (QT, UT, UQ)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cls computed are : TT, EE, BB, TE, TB, EB, (ET, BT, BE) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;with no mixing between EE and BB<br>
+&nbsp;&nbsp;NO desactivates decoupling :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Correlation functions computed are : TT, QQ, UU, TQ, TU, QU, (QT, UT, UQ)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cls computed are : TT, EE, BB, TE, TB, EB, (ET, BT, BE) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;with coupling between EE and BB<br>
+ <br>
+&nbsp;&nbsp; In both cases, the TE (and TB) estimators are unbiased using window functions (see<br>
+&nbsp;&nbsp;&nbsp;&nbsp;options <a href="#tenormfilein">-<kbd>tenormfilein</kbd></a>, <a href="#tenormfileout">-<kbd>tenormfileout</kbd></a>, <a href="#windowfilein">-<kbd>windowfilein</kbd></a>, <a href="#windowfileout">-<kbd>windowfileout</kbd></a>).<br>
+<br>
+-<a id="dry"><span style="font-size:larger"><strong><kbd>dry</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;This unsafe option allows reading partly corrupted files, i.e. with<br>
+&nbsp;&nbsp;incomplete headers. However the size of the fits file must be correct,<br>
+&nbsp;&nbsp;i.e. it must correspond to a full sky map with 12*nside^2 pixels.<br>
+<br>
+-<a id="extramapfile"><span style="font-size:larger"><strong><kbd>extramapfile</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;name of the (optional) extra input map file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be added to mapfile before analysis. <br>
+&nbsp;&nbsp;Must be in the some Coordinates, Nside and Units as mapfile<br>
+&nbsp;&nbsp;(ordering can be different).<br>
+<br>
+-<a id="extramapfile2"><span style="font-size:larger"><strong><kbd>extramapfile2</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;name of the (optional) extra input map file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be added to mapfile2 before analysis. <br>
+&nbsp;&nbsp;Must be in the some Coordinates, Nside and Units as mapfile2<br>
+&nbsp;&nbsp;(ordering can be different).<br>
+<br>
+-<a id="fits_out"><span style="font-size:larger"><strong><kbd>fits_out</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;If set, the Cl and correlation (<a href="#clfile">-<kbd>clfile</kbd></a>, <a href="#corfile">-<kbd>corfile</kbd></a>, <a href="#cl_outmap_file">-<kbd>cl_outmap_file</kbd></a>, <a href="#cl_outmask_file">-<kbd>cl_outmask_file</kbd></a>)<br>
+&nbsp;&nbsp;are written in FITS Ascii files, instead of plain text files.<br>
+&nbsp;&nbsp;This does not affect the input Cl files (<a href="#cl_inmap_file">-<kbd>cl_inmap_file</kbd></a> and <a href="#cl_inmask_file">-<kbd>cl_inmask_file</kbd></a>),<br>
+&nbsp;&nbsp;which will be read whatever is their format.<br>
+<br>
+-<a id="help"><span style="font-size:larger"><strong><kbd>help</kbd></strong></span></a><br>
+&nbsp;&nbsp;print this message and stop<br>
+<br>
+-<a id="history"><span style="font-size:larger"><strong><kbd>history</kbd></strong></span></a><br>
+&nbsp;&nbsp;print history of the program and stop<br>
+<br>
+-<a id="kernelsfileout"><span style="font-size:larger"><strong><kbd>kernelsfileout</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;Compute and ouput the 4 kernels, each of size (lmax+1)*(2*lmax+1),<br>
+&nbsp;&nbsp;relating the Spice (polarized) estimator to the 'true' underlying CMB spectra.<br>
+&nbsp;&nbsp;  These kernels are not needed by the code and are provided for <br>
+&nbsp;&nbsp;eg, cosmological interpretation of the result.<br>
+&nbsp;&nbsp;  Note that these kernels depend on the choice<br>
+&nbsp;&nbsp;of apodization (options <a href="#apodizetype">-<kbd>apodizetype</kbd></a> and <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>) <br>
+&nbsp;&nbsp;and on <a href="#thetamax">-<kbd>thetamax</kbd></a> and <a href="#nlmax">-<kbd>nlmax</kbd></a>.<br>
+&nbsp;&nbsp;  How to use them depends on the <a href="#decouple">-<kbd>decouple</kbd></a> option <br>
+&nbsp;&nbsp;(see the FITS file header for more information).<br>
+&nbsp;&nbsp;  This option is inactive if option <a href="#windowfilein">-<kbd>windowfilein</kbd></a> is active.<br>
+&nbsp;&nbsp;YES activates output of the kernels in default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;FITS file <i>spice.kernels</i><br>
+&nbsp;&nbsp;NO desactivates output of the kernels<br>
+<br>
+-<a id="listmapfiles1_K"><span style="font-size:larger"><strong><kbd>listmapfiles1_K</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;with K integer in [1, 10]<br>
+&nbsp;&nbsp;list of map files to be combined with weights <a href="#listmapweights1_K">-<kbd>listmapweights1_K</kbd></a><br>
+&nbsp;&nbsp;to form the first map to analyze.<br>
+&nbsp;&nbsp;If this option is set, <a href="#mapfile">-<kbd>mapfile</kbd></a> (and <a href="#extramapfile">-<kbd>extramapfile</kbd></a>) are ignored<br>
+<br>
+-<a id="listmapfiles2_K"><span style="font-size:larger"><strong><kbd>listmapfiles2_K</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;with K integer in [1, 10]<br>
+&nbsp;&nbsp;list of map files to be combined with weights <a href="#listmapweights2_K">-<kbd>listmapweights2_K</kbd></a><br>
+&nbsp;&nbsp;to form the optional second map to cross-correlate with the first one.<br>
+&nbsp;&nbsp;If this option is set, <a href="#mapfile2">-<kbd>mapfile2</kbd></a> (and <a href="#extramapfile2">-<kbd>extramapfile2</kbd></a>) are ignored<br>
+<br>
+-<a id="listmapweights1_K"><span style="font-size:larger"><strong><kbd>listmapweights1_K</kbd></strong></span></a> [dfloat|NO](1.0)<br>
+&nbsp;&nbsp;with K integer in [1, 10]<br>
+&nbsp;&nbsp;list of weights to be applied to <a href="#listmapfiles1_K">-<kbd>listmapfiles1_K</kbd></a> above<br>
+&nbsp;&nbsp;to form the first map to analyze.<br>
+&nbsp;&nbsp;m1 = w1(1) * m1(1) + w1(2) * m1(2) + ... <br>
+<br>
+-<a id="listmapweights2_K"><span style="font-size:larger"><strong><kbd>listmapweights2_K</kbd></strong></span></a> [dfloat|NO](1.0)<br>
+&nbsp;&nbsp;with K integer in [1, 10]<br>
+&nbsp;&nbsp;list of weights to be applied to <a href="#listmapfiles2_K">-<kbd>listmapfiles2_K</kbd></a> above<br>
+&nbsp;&nbsp;to form the second optional map to analyze.<br>
+&nbsp;&nbsp;m2 = w2(1) * m2(1) + w2(2) * m2(2) + ... <br>
+<br>
+-<a id="mapfile"><span style="font-size:larger"><strong><kbd>mapfile</kbd></strong></span></a> [name|YES](YES)<br>
+&nbsp;&nbsp;name of the input map file (healpix SP fits file)<br>
+&nbsp;&nbsp;YES is equivalent to take input file <i>map.fits</i><br>
+&nbsp;&nbsp;Starting with version 2.90 and if linked with HEALPix 3.10+<br>
+&nbsp;&nbsp;<i>file.fits</i>[extname] means extension 'extname' of <i>file.fits</i><br>
+<br>
+-<a id="mapfile2"><span style="font-size:larger"><strong><kbd>mapfile2</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of the second (optional) input map file (healpix SP fits file)<br>
+&nbsp;&nbsp;to cross-correlate with the first one (<a href="#mapfile">-<kbd>mapfile</kbd></a>)<br>
+&nbsp;&nbsp;If provided, ONLY cross-correlation is performed (no auto-correlation)<br>
+&nbsp;&nbsp;YES is equivalent to take input file <i>map2.fits</i><br>
+&nbsp;&nbsp;NO turns off map-map cross-correlation<br>
+<br>
+-<a id="maskfile"><span style="font-size:larger"><strong><kbd>maskfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of the input mask file (healpix SP fits file)<br>
+&nbsp;&nbsp;A mask file is composed of zeros (masked) and ones (in)<br>
+&nbsp;&nbsp;YES activates maskfile with name <i>mask.fits</i><br>
+&nbsp;&nbsp;NO desactivates <a href="#maskfile">-<kbd>maskfile</kbd></a><br>
+&nbsp;&nbsp;Starting with version 2.90 and if linked with HEALPix 3.10+<br>
+&nbsp;&nbsp;<i>file.fits</i>[extname] means extension 'extname' of <i>file.fits</i><br>
+<br>
+-<a id="maskfile2"><span style="font-size:larger"><strong><kbd>maskfile2</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of the input mask file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be applied to the second map<br>
+&nbsp;&nbsp;YES activates <a href="#maskfile2">-<kbd>maskfile2</kbd></a> with name <i>mask2.fits</i><br>
+&nbsp;&nbsp;NO desactivates <a href="#maskfile2">-<kbd>maskfile2</kbd></a><br>
+ Notes:<br>
+  1) if the you want the 2nd mask to be the same as the 1st one, <br>
+&nbsp;&nbsp; set <a href="#maskfile2">-<kbd>maskfile2</kbd></a> to the same name as <a href="#maskfile">-<kbd>maskfile</kbd></a><br>
+  2) the 2 masks should overlap at least partially<br>
+<br>
+-<a id="maskfilep"><span style="font-size:larger"><strong><kbd>maskfilep</kbd></strong></span></a> [name|YES](YES)<br>
+&nbsp;&nbsp;name of the input mask file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be applied to polarization.<br>
+&nbsp;&nbsp;By default, it is the same as <a href="#maskfile">-<kbd>maskfile</kbd></a><br>
+&nbsp;&nbsp;Ignored if polarization is set to NO<br>
+<br>
+-<a id="maskfilep2"><span style="font-size:larger"><strong><kbd>maskfilep2</kbd></strong></span></a> [name|YES](YES)<br>
+&nbsp;&nbsp;name of the input mask file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be applied to the second map polarization<br>
+&nbsp;&nbsp;By default, it is the same as <a href="#maskfile2">-<kbd>maskfile2</kbd></a><br>
+&nbsp;&nbsp;Ignored if polarization is set to NO<br>
+<br>
+-<a id="nlmax"><span style="font-size:larger"><strong><kbd>nlmax</kbd></strong></span></a> [integer](3*Nside-1)<br>
+&nbsp;&nbsp;value of the largest multipole used in the analysis.<br>
+&nbsp;&nbsp;The default is 3*Nside-1, where Nside is the Healpix resolution parameter <br>
+&nbsp;&nbsp;of the map being analyzed.<br>
+&nbsp;&nbsp;Any value larger than 3*Nside-1 or &le; 0 will be replaced by the default.<br>
+<br>
+-<a id="noiseclfile"><span style="font-size:larger"><strong><kbd>noiseclfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of input file for Cls of the noise<br>
+&nbsp;&nbsp;if <a href="#noiseclfile">-<kbd>noiseclfile</kbd></a> is specified, noise subtraction is applied<br>
+&nbsp;&nbsp;to both final Cls and correlation function (unless <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> is<br>
+&nbsp;&nbsp;specified for the latter)<br>
+&nbsp;&nbsp;YES activates noise subtraction from file noise.cl<br>
+&nbsp;&nbsp;NO desactivates noise subtraction from a Cl noise file<br>
+<br>
+-<a id="noisecorfile"><span style="font-size:larger"><strong><kbd>noisecorfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of input file for correlation function of the noise<br>
+&nbsp;&nbsp;if <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> is specified, noise subtraction is applied<br>
+&nbsp;&nbsp;to both final correlation function and Cls (unless <a href="#noiseclfile">-<kbd>noiseclfile</kbd></a> is<br>
+&nbsp;&nbsp;specified for the latter)<br>
+&nbsp;&nbsp;YES activates noise subtraction from file noise.cor<br>
+&nbsp;&nbsp;NO desactivates noise subtraction from a correlation noise file<br>
+<br>
+-<a id="normfac"><span style="font-size:larger"><strong><kbd>normfac</kbd></strong></span></a> [dfloat|NO](NO)<br>
+&nbsp;&nbsp;normalization factor. If normfac is specified, the correlation<br>
+&nbsp;&nbsp;function and the Cls are multiplied by normfac**2<br>
+&nbsp;&nbsp;NO and <a href="#normfac">-<kbd>normfac</kbd></a>=1.0 are equivalent : in that case<br>
+&nbsp;&nbsp;normalization is inactive to save calculations.<br>
+&nbsp;&nbsp;NOTE : if noise subtraction is active (options <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or<br>
+&nbsp;&nbsp;<a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>), the input noise data are assumed to be already<br>
+&nbsp;&nbsp;normalized appropriately<br>
+<br>
+-<a id="optinfile"><span style="font-size:larger"><strong><kbd>optinfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;Read the options in an file (only those which are not specified<br>
+&nbsp;&nbsp;interactively are taken into account).<br>
+&nbsp;&nbsp;YES reads default input option file <i>.spicerc</i><br>
+&nbsp;&nbsp;NO desactivates the reading.<br>
+&nbsp;&nbsp;NOTE 1 : The file containing the options is a 2-column file,<br>
+&nbsp;&nbsp;the first column corresponds to the option (without the "-" at the<br>
+&nbsp;&nbsp;beginning) and the second column to the parameter (see below for<br>
+&nbsp;&nbsp;an <a href="#Example">example</a>).<br>
+&nbsp;&nbsp;NOTE 2 : It is not necessary to specify all the options in this<br>
+&nbsp;&nbsp;file, and the order in which they appear does not matter. If an<br>
+&nbsp;&nbsp;option is specified neither in the option file nor interactively,<br>
+&nbsp;&nbsp;then the default value is assumed for this option.<br>
+<br>
+-<a id="optoutfile"><span style="font-size:larger"><strong><kbd>optoutfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;Output the options in an file (read with option <a href="#optinfile">-<kbd>optinfile</kbd></a> or specified<br>
+&nbsp;&nbsp;interactively. In that case, no calculation is performed, only the<br>
+&nbsp;&nbsp;file containing the options is created.<br>
+&nbsp;&nbsp;YES output option file with default name <i>.spicerc</i><br>
+&nbsp;&nbsp;NO desactivates the output<br>
+&nbsp;&nbsp;NOTE : see note of <a href="#optinfile">-<kbd>optinfile</kbd></a>.<br>
+<br>
+-<a id="overwrite"><span style="font-size:larger"><strong><kbd>overwrite</kbd></strong></span></a> [YES|NO](YES)<br>
+&nbsp;&nbsp;Activates overwriting for all output files.<br>
+&nbsp;&nbsp;YES overwrite all the output files generated previously.<br>
+&nbsp;&nbsp;NO checks if any of the output files already exist. If it is the<br>
+&nbsp;&nbsp;case, SpICE stops without mercy.<br>
+&nbsp;&nbsp;To have more sophisticated handling of overwriting, the standard<br>
+&nbsp;&nbsp;Healpix syntax can be used : file names in the form !name means<br>
+&nbsp;&nbsp;that the name of the file to be used is name and the "!" explicitely allows<br>
+&nbsp;&nbsp;overwriting.<br>
+<br>
+-<a id="pixelfile"><span style="font-size:larger"><strong><kbd>pixelfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of input pixel correction file for 1st map<br>
+&nbsp;&nbsp;YES activates pixel window correction with file <br>
+&nbsp;&nbsp;${HEALPIXDATA}/<i>pixel_window_nxxxx.fits</i><br>
+&nbsp;&nbsp;or<br>
+&nbsp;&nbsp;${HEALPIX}/data/<i>pixel_window_nxxxx.fits</i><br>
+&nbsp;&nbsp;where xxxx corresponds to the value of nside of input map file.<br>
+&nbsp;&nbsp;NO desactivates pixel window correction.<br>
+&nbsp;&nbsp;NOTE : if noise subtraction is active (options <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or<br>
+&nbsp;&nbsp;<a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>), the input noise data are assumed to be already corrected<br>
+&nbsp;&nbsp;for pixel window<br>
+<br>
+-<a id="pixelfile2"><span style="font-size:larger"><strong><kbd>pixelfile2</kbd></strong></span></a> [name|YES|NO](pixelfile)<br>
+&nbsp;&nbsp;name of input pixel correction file for 2nd map (for cross-analysis)<br>
+ Default value is the one chosen for <a href="#pixelfile">-<kbd>pixelfile</kbd></a>.<br>
+ If set to YES explicitly, or implicitly via <a href="#pixelfile">-<kbd>pixelfile</kbd></a>, <br>
+ the standard pixel window function adapted to the 2nd map Nside will be used.<br>
+ It must be set to NO to prevent pixel correction of 2nd map.<br>
+<br>
+-<a id="polarization"><span style="font-size:larger"><strong><kbd>polarization</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;to compute polarized power spectra/correlation functions<br>
+&nbsp;&nbsp;in addition to standard temperature Cls/correlation<br>
+&nbsp;&nbsp;function. The input map file is supposed to be in the standard<br>
+&nbsp;&nbsp;polarized Healpix fits format, so it contains 3 maps (T,Q,U)<br>
+&nbsp;&nbsp;instead of one.<br>
+&nbsp;&nbsp;The polarized Cls and correlation functions computed depend on the<br>
+&nbsp;&nbsp;choice of parameter decouple explained below (see option <a href="#decouple">-<kbd>decouple</kbd></a>).<br>
+<br>
+-<a id="subav"><span style="font-size:larger"><strong><kbd>subav</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;in case the input map is expected to have an offset, its (weighted)<br>
+&nbsp;&nbsp;average can be subtracted from it prior to the calculations,<br>
+&nbsp;&nbsp;in order to insure zero average.<br>
+&nbsp;&nbsp;When there are masks/weights, W(i), this average is computed<br>
+&nbsp;&nbsp;simply as [sum_i W(i) map(i)]/[sum_i W(i)].<br>
+&nbsp;&nbsp;See options <a href="#maskfile">-<kbd>maskfile</kbd></a>, <a href="#weightfile">-<kbd>weightfile</kbd></a>, <a href="#weightpower">-<kbd>weightpower</kbd></a> for more information<br>
+&nbsp;&nbsp;on the masks/weights.<br>
+&nbsp;&nbsp;It is important to notice that the estimator of the correlation function<br>
+&nbsp;&nbsp;or the Cls is not expected anymore to be unbiased if option <a href="#subav">-<kbd>subav</kbd></a><br>
+&nbsp;&nbsp;is active. It would be the case only if the offset would be exactly<br>
+&nbsp;&nbsp;known and not estimated directly from the data.<br>
+&nbsp;&nbsp;YES activates average subtraction.<br>
+&nbsp;&nbsp;NO desactivates average subtraction.<br>
+<br>
+-<a id="subdipole"><span style="font-size:larger"><strong><kbd>subdipole</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;the best fit monopole and dipole will regressed out from the<br>
+&nbsp;&nbsp;(masked and weighted) data before spectral analysis. <br>
+&nbsp;&nbsp;YES activates dipole and monopole subtraction.<br>
+&nbsp;&nbsp;NO desactivates dipole and monopole subtraction.<br>
+&nbsp;&nbsp;<a href="#subdipole">-<kbd>subdipole</kbd></a>=YES implies <a href="#subav">-<kbd>subav</kbd></a>=YES and has the same caveats.<br>
+<br>
+-<a id="symmetric_cl"><span style="font-size:larger"><strong><kbd>symmetric_cl</kbd></strong></span></a> [YES|NO](NO)<br>
+&nbsp;&nbsp;by default, when 2 maps are provided, and <a href="#polarization">-<kbd>polarization</kbd></a> is set,<br>
+&nbsp;&nbsp;cross spectra such as TE are defined as T_map1 * E_map2 <br>
+  (in which case it is recommended to use the least noisy map as map2)<br>
+&nbsp;&nbsp;and 9 spectra are produced.<br>
+&nbsp;&nbsp;If <a href="#symmetric_cl">-<kbd>symmetric_cl</kbd></a> is set to YES, then<br>
+&nbsp;&nbsp;TE = (T_map1 * E_map2 + T_map2 * E_map1)/2<br>
+&nbsp;&nbsp;and 6 spectra are produced.<br>
+  In the single map case, TE=ET and only 6 spectra are produced.<br>
+<br>
+-<a id="tenormfilein"><span style="font-size:larger"><strong><kbd>tenormfilein</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;this option is ignored if <a href="#polarization">-<kbd>polarization</kbd></a> is not active :<br>
+&nbsp;&nbsp;reads the normalisation function needed to compute correctly the TE (and TB) spectra<br>
+&nbsp;&nbsp;and correlation functions, instead of computing it. <br>
+&nbsp;&nbsp;The calculation of this term depends on the apodization chosen <br>
+&nbsp;&nbsp;(options <a href="#apodizetype">-<kbd>apodizetype</kbd></a> and <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>).<br>
+&nbsp;&nbsp;YES activates input of the normalisation function with default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;input file name <i>spice.tenorm</i><br>
+&nbsp;&nbsp;NO desactivates input of the normalisation function : it is computed<br>
+&nbsp;&nbsp;&nbsp;&nbsp;on run time.<br>
+<br>
+-<a id="tenormfileout"><span style="font-size:larger"><strong><kbd>tenormfileout</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;Compute and ouput the normalisation function needed to compute the  <br>
+&nbsp;&nbsp;TE (and TB) spectra. Note that this function depends on the choice<br>
+&nbsp;&nbsp; of apodization (options <a href="#apodizetype">-<kbd>apodizetype</kbd></a> and <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>).<br>
+&nbsp;&nbsp;This option is inactive, of course, if option <a href="#tenormfilein">-<kbd>tenormfilein</kbd></a> is active, or<br>
+&nbsp;&nbsp;if option <a href="#polarization">-<kbd>polarization</kbd></a> is inactive.<br>
+&nbsp;&nbsp;YES activates output of the normalisation function in default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file <i>spice.tenorm</i><br>
+&nbsp;&nbsp;NO desactivates output of the normalisation function (but it is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;computed if needed).<br>
+<br>
+-<a id="tf_file"><span style="font-size:larger"><strong><kbd>tf_file</kbd></strong></span></a> [name|NO](NO)<br>
+&nbsp;&nbsp;name of the input tranfer function file.<br>
+&nbsp;&nbsp;The output C(l) will be divided by the transfer function(s) read<br>
+&nbsp;&nbsp;from this file.<br>
+&nbsp;&nbsp;The transfer function is defined as the ratio of 2 power spectra.<br>
+&nbsp;&nbsp;The file should have the same format as the C(l) produced by this code.<br>
+<br>
+-<a id="thetamax"><span style="font-size:larger"><strong><kbd>thetamax</kbd></strong></span></a> [dfloat|NO](NO)<br>
+&nbsp;&nbsp;maximum value of angle theta used in the integrals to compute the<br>
+&nbsp;&nbsp;power spectra from the correlation functions.<br>
+&nbsp;&nbsp;NO desactivates upper bound (sets it to 180 degrees).<br>
+<br>
+-<a id="tolerance"><span style="font-size:larger"><strong><kbd>tolerance</kbd></strong></span></a> [dfloat|NO](NO)<br>
+&nbsp;&nbsp;relative tolerance on convergence of QQ and UU integrals (see <a href="#decouple">-<kbd>decouple</kbd></a>)<br>
+&nbsp;&nbsp;Active only when <a href="#decouple">-<kbd>decouple</kbd></a> is set<br>
+&nbsp;&nbsp;Smaller values give more accurate EE and BB spectra, in longer times.<br>
+&nbsp;&nbsp;NO leaves it to its default value (1.e-5).<br>
+<br>
+-<a id="usage"><span style="font-size:larger"><strong><kbd>usage</kbd></strong></span></a><br>
+&nbsp;&nbsp;print short usage reminder<br>
+<br>
+-<a id="verbosity"><span style="font-size:larger"><strong><kbd>verbosity</kbd></strong></span></a> [0|1|2|YES|NO](1)<br>
+&nbsp;&nbsp;verbose option :<br>
+&nbsp;&nbsp;0 or NO : no verbose<br>
+&nbsp;&nbsp;1 or YES : standard verbose<br>
+&nbsp;&nbsp;2 : full verbose<br>
+<br>
+-<a id="version"><span style="font-size:larger"><strong><kbd>version</kbd></strong></span></a><br>
+&nbsp;&nbsp;prints version number and exits<br>
+<br>
+-<a id="weightfile"><span style="font-size:larger"><strong><kbd>weightfile</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of the input weight file (healpix SP fits file)<br>
+&nbsp;&nbsp;Weights should be always positive or equal to zero.<br>
+&nbsp;&nbsp;If masks are present, weights are multiplied by the masks.<br>
+&nbsp;&nbsp;If masks are not present, weights are supposed to be already masked,<br>
+&nbsp;&nbsp;i.e. are equal to zero for masked pixels<br>
+&nbsp;&nbsp;YES activates <a href="#weightfile">-<kbd>weightfile</kbd></a> with name <i>weight.fits</i><br>
+&nbsp;&nbsp;NO desactivates <a href="#weightfile">-<kbd>weightfile</kbd></a><br>
+<br>
+-<a id="weightfile2"><span style="font-size:larger"><strong><kbd>weightfile2</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;name of the input weight file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be applied to the second map<br>
+&nbsp;&nbsp;YES activates <a href="#weightfile2">-<kbd>weightfile2</kbd></a> with name <i>weight2.fits</i><br>
+&nbsp;&nbsp;NO desactivates <a href="#weightfile2">-<kbd>weightfile2</kbd></a><br>
+<br>
+-<a id="weightfilep"><span style="font-size:larger"><strong><kbd>weightfilep</kbd></strong></span></a> [name|YES](YES)<br>
+&nbsp;&nbsp;name of the input weight file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be applied to polarization (Q and U Stokes parameters).<br>
+&nbsp;&nbsp;By default, it is the same as <a href="#weightfile">-<kbd>weightfile</kbd></a><br>
+&nbsp;&nbsp;Ignored if polarization is set to NO<br>
+<br>
+-<a id="weightfilep2"><span style="font-size:larger"><strong><kbd>weightfilep2</kbd></strong></span></a> [name|YES](YES)<br>
+&nbsp;&nbsp;name of the input weight file (healpix SP fits file)<br>
+&nbsp;&nbsp;to be applied to the second map polarization<br>
+&nbsp;&nbsp;By default, it is the same as <a href="#weightfile2">-<kbd>weightfile2</kbd></a><br>
+&nbsp;&nbsp;Ignored if polarization is set to NO<br>
+<br>
+-<a id="weightpower"><span style="font-size:larger"><strong><kbd>weightpower</kbd></strong></span></a> [dfloat|NO](1.0)<br>
+&nbsp;&nbsp;the weights are taken to this power.<br>
+&nbsp;&nbsp;if <a href="#weightpower">-<kbd>weightpower</kbd></a> = 0.0, the weights are transformed into pure masks<br>
+&nbsp;&nbsp;if <a href="#weightpower">-<kbd>weightpower</kbd></a> &lt; 0.0, only the non zero values of the weights are<br>
+&nbsp;&nbsp;modified.<br>
+&nbsp;&nbsp;NO is equivalent to <a href="#weightpower">-<kbd>weightpower</kbd></a>=1.0.<br>
+<br>
+-<a id="weightpower2"><span style="font-size:larger"><strong><kbd>weightpower2</kbd></strong></span></a> [dfloat|NO](1.0)<br>
+&nbsp;&nbsp;the weights of the second map are taken to this power.<br>
+&nbsp;&nbsp;NO is equivalent to <a href="#weightpower2">-<kbd>weightpower2</kbd></a>=1.0.<br>
+<br>
+-<a id="weightpowerp"><span style="font-size:larger"><strong><kbd>weightpowerp</kbd></strong></span></a> [dfloat|YES](YES)<br>
+&nbsp;&nbsp;the weights applied to 1st map (Q,U) are taken to this power.<br>
+&nbsp;&nbsp;Default: same as 1st Temperature weight power (see <a href="#weightpower">-<kbd>weightpower</kbd></a>)<br>
+<br>
+-<a id="weightpowerp2"><span style="font-size:larger"><strong><kbd>weightpowerp2</kbd></strong></span></a> [dfloat|YES](YES)<br>
+&nbsp;&nbsp;the weights applied to 2nd map (Q,U) are taken to this power.<br>
+&nbsp;&nbsp;Default: same as 2nd Temperature weight power (see <a href="#weightpower2">-<kbd>weightpower2</kbd></a>)<br>
+<br>
+-<a id="windowfilein"><span style="font-size:larger"><strong><kbd>windowfilein</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;this option is ignored if polarization is not active :<br>
+&nbsp;&nbsp;reads the kcross term needed to compute correctly the TE (and TB) spectra<br>
+&nbsp;&nbsp;and correlation functions, instead of computing it. <br>
+&nbsp;&nbsp;The calculation of this term depends on the apodization chosen <br>
+&nbsp;&nbsp;(options <a href="#apodizetype">-<kbd>apodizetype</kbd></a> and <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>).<br>
+&nbsp;&nbsp;YES activates input of the window function with default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;input file name <i>spice.window</i><br>
+&nbsp;&nbsp;NO desactivates input of the window function : it is computed<br>
+&nbsp;&nbsp;&nbsp;&nbsp;on run time.<br>
+<br>
+-<a id="windowfileout"><span style="font-size:larger"><strong><kbd>windowfileout</kbd></strong></span></a> [name|YES|NO](NO)<br>
+&nbsp;&nbsp;Compute and ouput the kcross term needed to compute the  <br>
+&nbsp;&nbsp;TE (and TB) spectra. Note that this kcross term depends on the choice<br>
+&nbsp;&nbsp; of apodization (options <a href="#apodizetype">-<kbd>apodizetype</kbd></a> and <a href="#apodizesigma">-<kbd>apodizesigma</kbd></a>).<br>
+&nbsp;&nbsp;This option is inactive, of course, if option <a href="#windowfilein">-<kbd>windowfilein</kbd></a> is active, or<br>
+&nbsp;&nbsp;if option <a href="#polarization">-<kbd>polarization</kbd></a> is inactive.<br>
+&nbsp;&nbsp;YES activates output of the window function in default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file <i>spice.window</i><br>
+&nbsp;&nbsp;NO desactivates output of the window function (but it is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;computed if needed).<br>
+<br>
+<br>
+<br><p class="center"><a href="#TOC">Back to TOC</a></p><br><br><a id="ImportantNote">IMPORTANT NOTE</a><br>
+<br>
+The order of the operations is not the same whether mask/weights are present<br>
+or not.<br>
+<br>
+If there is no mask/weight, spice is nearly equivalent to anafast, and<br>
+the order of operations is the following :<br>
+&nbsp;&nbsp;(1a) map average subtraction, if required<br>
+&nbsp;&nbsp;(2a) calculation of Cl<br>
+&nbsp;&nbsp;(3a) pixel window correction, beam correction, transfer function correction,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; renormalization, if required<br>
+&nbsp;&nbsp;(4a) calculation of the 2pt correlation function, xi, if needed<br>
+&nbsp;&nbsp;(5a) apodization of xi and calculation of the final Cl, if  needed<br>
+&nbsp;&nbsp;(6a) subtraction of noise bias on Cl and/or xi, if applicable<br>
+<br>
+If there is any mask/weight, the order of operations is the following<br>
+&nbsp;&nbsp;(1b) multiplication of the map by the masks/weights<br>
+&nbsp;&nbsp;(2b) subtraction of the (weighted) average<br>
+&nbsp;&nbsp;(3b) calculation of the Cl of the map and of the masks/weights<br>
+&nbsp;&nbsp;(4b) calculation of the correlation function of the map and of the<br>
+&nbsp;&nbsp;&nbsp;&nbsp; masks/weights, and the corresponding ratio, xi<br>
+&nbsp;&nbsp;(5b) decoupling if needed (polarization case)<br>
+&nbsp;&nbsp;(6b) apodization of xi, if required<br>
+&nbsp;&nbsp;(7b) renormalization, if required<br>
+&nbsp;&nbsp;(8b) calculation of Cl from xi, if needed<br>
+&nbsp;&nbsp;(9b) pixel window correction, beam correction, transfer function correction,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; if required, to obtain the final Cl<br>
+  (10b) calculation of final xi, if needed<br>
+  (11b) subtraction of noise bias on Cl and/or xi, if applicable<br>
+<br>
+Note, therefore, that if there are masks/weights, beam correction and<br>
+pixel window correction are performed AFTER apodization, at variance with<br>
+the case without mask/weight. Such ordering in the procedure is expected<br>
+to introduce a small bias in the final results. Ideally, beam and pixel<br>
+window correction should be performed before apodization, but this is<br>
+possible only prior to masking/weighting on a FULL SKY map, i.e. before<br>
+operation (1b).<br>
+<br>
+<p class="center"><a href="#TOC">Back to TOC</a></p><br><br><a id="Examples">EXAMPLES</a><br>
+<br>
+spice<br>
+spice <a href="#mapfile">-<kbd>mapfile</kbd></a> YES <a href="#corfile">-<kbd>corfile</kbd></a> YES <a href="#clfile">-<kbd>clfile</kbd></a> YES<br>
+&nbsp;&nbsp;reads default input map, computes correlation function<br>
+&nbsp;&nbsp;and Cl and output them on default output files<br>
+&nbsp;&nbsp;no masks/weights are taken into account<br>
+<br>
+spice <a href="#mapfile">-<kbd>mapfile</kbd></a> <i>mymap.fits</i> <a href="#weightfile">-<kbd>weightfile</kbd></a> <i>weights.fits</i> <a href="#clfile">-<kbd>clfile</kbd></a> NO<br>
+&nbsp;&nbsp;reads input map <i>mymap.fits</i>, input file <i>weights.fits</i> for weights,<br>
+&nbsp;&nbsp;output correlation functions only<br>
+<br>
+spice <a href="#mapfile">-<kbd>mapfile</kbd></a> <i>mymap.fits</i> <a href="#maskfile">-<kbd>maskfile</kbd></a> <i>mymasks.fits</i> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#weightfile">-<kbd>weightfile</kbd></a> <i>myweights.fits</i> <a href="#beam">-<kbd>beam</kbd></a> 18.d0<br>
+&nbsp;&nbsp;reads input map <i>mymap.fits</i>, input mask file <i>mymasks.fits</i>,<br>
+&nbsp;&nbsp;input weight file <i>myweights.fits</i>, computes Cl and<br>
+&nbsp;&nbsp;correlation function with correction for a beam of<br>
+&nbsp;&nbsp;18 arcmin, output them on default output files. If both<br>
+&nbsp;&nbsp;mask and weight files are specified, the weights are<br>
+&nbsp;&nbsp;multiplied by the masks, allowing one to read a full unmasked<br>
+&nbsp;&nbsp;weight file<br>
+<br>
+spice <a href="#mapfile">-<kbd>mapfile</kbd></a> <i>mymap.fits</i> <a href="#weightfile">-<kbd>weightfile</kbd></a> <i>myweights.fits</i>  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> <i>mynoise.cor</i> <a href="#noiseclfile">-<kbd>noiseclfile</kbd></a> <i>mynoise.cl</i><br>
+&nbsp;&nbsp;reads input map <i>mymap.fits</i>, input weight file <i>myweights.fits</i>,<br>
+&nbsp;&nbsp;computes Cls and correlation function, subtracts from Cls<br>
+&nbsp;&nbsp;the Cls of the noise from file <i>mynoise.cl</i>, subtracts from<br>
+&nbsp;&nbsp;the correlation function the correlation function of the noise<br>
+&nbsp;&nbsp;from <i>mynoise.cor</i>, output the results for the Cls and the<br>
+&nbsp;&nbsp;correlation function on default output files.<br>
+&nbsp;&nbsp;Since only the weights are specified, they are supposed<br>
+&nbsp;&nbsp;to be appropriately masked.<br>
+&nbsp;&nbsp;Even if only one noise file is specified, either from the<br>
+&nbsp;&nbsp;option <a href="#noisecorfile">-<kbd>noisecorfile</kbd></a> or from the option <a href="#noiseclfile">-<kbd>noiseclfile</kbd></a>,<br>
+&nbsp;&nbsp;noise correction is applied to both Cls and the the<br>
+&nbsp;&nbsp;correlation function. But this latter way is less accurate<br>
+&nbsp;&nbsp;because of the supplementary Legendre transform it involves.<br>
+<br>
+spice <a href="#mapfile">-<kbd>mapfile</kbd></a> <i>mymap.fits</i> <a href="#polarization">-<kbd>polarization</kbd></a> YES \ <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#maskfile">-<kbd>maskfile</kbd></a> <i>mymasks.fits</i><br>
+&nbsp;&nbsp;reads multiple input mapfile <i>mymap.fits</i> (T,Q,U), computes<br>
+&nbsp;&nbsp;the temperature and polarization Cls (TT, GG, CC, TG, TC and GC) and<br>
+&nbsp;&nbsp;correlation functions (TT, QQ, UU, TQ, TU, QU), and writes the<br>
+&nbsp;&nbsp;results in default output files. All the calculations use<br>
+&nbsp;&nbsp;appropriate mask corrections.<br>
+<br>
+spice <a href="#optinfile">-<kbd>optinfile</kbd></a> YES<br>
+spice <a href="#optinfile">-<kbd>optinfile</kbd></a> <i>.spicerc</i><br>
+&nbsp;&nbsp;Read options and parameters in default file <i>.spicerc</i><br>
+&nbsp;&nbsp;and run spice accordingly.<br>
+<br>
+<p class="center"><a href="#TOC">Back to TOC</a></p><br><br><a id="Example">EXAMPLE OF OPTIONS INPUT FILE</a> (<i>.spicerc</i>) :<br>
+<a href="#alm1fileout"><kbd>alm1fileout</kbd></a> = NO<br>
+<a href="#alm2fileout"><kbd>alm2fileout</kbd></a> = NO<br>
+<a href="#apodizesigma"><kbd>apodizesigma</kbd></a> = NO<br>
+<a href="#apodizetype"><kbd>apodizetype</kbd></a> = NO<br>
+<a href="#beam"><kbd>beam</kbd></a> = NO<br>
+<a href="#beam_file"><kbd>beam_file</kbd></a> = NO<br>
+<a href="#beam2"><kbd>beam2</kbd></a> = NO<br>
+<a href="#beam_file2"><kbd>beam_file2</kbd></a> = NO<br>
+<a href="#clfile"><kbd>clfile</kbd></a> = NO<br>
+<a href="#cl_outmap_file"><kbd>cl_outmap_file</kbd></a> = NO<br>
+<a href="#cl_inmap_file"><kbd>cl_inmap_file</kbd></a> = NO<br>
+<a href="#cl_outmask_file"><kbd>cl_outmask_file</kbd></a> = NO<br>
+<a href="#cl_inmask_file"><kbd>cl_inmask_file</kbd></a> = NO<br>
+<a href="#corfile"><kbd>corfile</kbd></a> = NO<br>
+<a href="#covfileout"><kbd>covfileout</kbd></a> = NO<br>
+<a href="#decouple"><kbd>decouple</kbd></a> = NO<br>
+<a href="#dry"><kbd>dry</kbd></a> = NO<br>
+<a href="#extramapfile"><kbd>extramapfile</kbd></a> = NO<br>
+<a href="#extramapfile2"><kbd>extramapfile2</kbd></a> = NO<br>
+<a href="#fits_out"><kbd>fits_out</kbd></a> = NO<br>
+<a href="#kernelsfileout"><kbd>kernelsfileout</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_1</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_2</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_3</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_4</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_5</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_6</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_7</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_8</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_9</kbd></a> = NO<br>
+<a href="#listmapfiles1_K"><kbd>listmapfiles1_10</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_1</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_2</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_3</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_4</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_5</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_6</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_7</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_8</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_9</kbd></a> = NO<br>
+<a href="#listmapfiles2_K"><kbd>listmapfiles2_10</kbd></a> = NO<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_1</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_2</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_3</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_4</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_5</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_6</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_7</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_8</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_9</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights1_K"><kbd>listmapweights1_10</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_1</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_2</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_3</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_4</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_5</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_6</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_7</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_8</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_9</kbd></a> =    1.00000000000000<br>
+<a href="#listmapweights2_K"><kbd>listmapweights2_10</kbd></a> =    1.00000000000000<br>
+<a href="#mapfile"><kbd>mapfile</kbd></a> = <i>map.fits</i><br>
+<a href="#mapfile2"><kbd>mapfile2</kbd></a> = NO<br>
+<a href="#maskfile"><kbd>maskfile</kbd></a> = NO<br>
+<a href="#maskfile2"><kbd>maskfile2</kbd></a> = NO<br>
+<a href="#maskfilep"><kbd>maskfilep</kbd></a> = YES<br>
+<a href="#maskfilep2"><kbd>maskfilep2</kbd></a> = YES<br>
+<a href="#nlmax"><kbd>nlmax</kbd></a> = NO<br>
+<a href="#normfac"><kbd>normfac</kbd></a> = NO<br>
+<a href="#npairsthreshold"><kbd>npairsthreshold</kbd></a> = NO<br>
+<a href="#noisecorfile"><kbd>noisecorfile</kbd></a> = NO<br>
+<a href="#noiseclfile"><kbd>noiseclfile</kbd></a> = NO<br>
+<a href="#overwrite"><kbd>overwrite</kbd></a> = YES<br>
+<a href="#pixelfile"><kbd>pixelfile</kbd></a> = NO<br>
+<a href="#pixelfile2"><kbd>pixelfile2</kbd></a> = NO<br>
+<a href="#polarization"><kbd>polarization</kbd></a> = NO<br>
+<a href="#subav"><kbd>subav</kbd></a> = NO<br>
+<a href="#subdipole"><kbd>subdipole</kbd></a> = NO<br>
+<a href="#symmetric_cl"><kbd>symmetric_cl</kbd></a> = NO<br>
+<a href="#tenormfilein"><kbd>tenormfilein</kbd></a> = NO<br>
+<a href="#tenormfileout"><kbd>tenormfileout</kbd></a> = NO<br>
+<a href="#tf_file"><kbd>tf_file</kbd></a> = NO<br>
+<a href="#thetamax"><kbd>thetamax</kbd></a> = NO<br>
+<a href="#tolerance"><kbd>tolerance</kbd></a> = NO<br>
+<a href="#verbosity"><kbd>verbosity</kbd></a> = 1<br>
+<a href="#weightfile"><kbd>weightfile</kbd></a> = NO<br>
+<a href="#weightfilep"><kbd>weightfilep</kbd></a> = YES<br>
+<a href="#weightfile2"><kbd>weightfile2</kbd></a> = NO<br>
+<a href="#weightfilep2"><kbd>weightfilep2</kbd></a> = YES<br>
+<a href="#weightpower"><kbd>weightpower</kbd></a> =    1.00000000000000<br>
+<a href="#weightpower2"><kbd>weightpower2</kbd></a> =    1.00000000000000<br>
+<a href="#weightpowerp"><kbd>weightpowerp</kbd></a> =    1.00000000000000<br>
+<a href="#weightpowerp2"><kbd>weightpowerp2</kbd></a> =    1.00000000000000<br>
+<a href="#windowfilein"><kbd>windowfilein</kbd></a> = NO<br>
+<a href="#windowfileout"><kbd>windowfileout</kbd></a> = NO<br>
+<br>
+<br><p class="center"><a href="#TOC">Back to TOC</a></p><br>
+<hr>
+<h2 class="center">
+    <a href="#Installation">Installation</a><br>
+    <a href="#StandardUsage">Standard Usage</a><br>
+    <a href="#ListOfKeywords">List of Keywords</a><br>
+    <a href="#ImportantNote">Important Note</a><br>
+    <a href="#Examples"     >Examples</a><br>
+    <a href="#Example"      >Example of Options Input File</a><br>
+</h2>
+<p class=center style=font-size:small>File generated automatically from README on Fri Oct 16 11:03:56 CEST 2020</p>
+
+</body>
+</html>
+

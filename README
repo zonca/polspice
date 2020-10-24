@@ -1,0 +1,720 @@
+
+INSTALLATION : 
+   See the file named INSTALL in the top directory 
+  
+STANDARD USAGE : 
+   spice [-keyword(1) parameter(1) ... -keyword(N) parameter(N)] 
+         [-optinfile parameter_file]
+  
+   All keywords are optional
+  
+ Format of parameter_file :
+              keyword = parameter
+       see example below
+
+LIST OF KEYWORDS :     keyword [possible parameters](default)
+
+-about
+   print copyright info and stop
+
+-alm1fileout [name|YES|NO](NO)
+   FITS file containing a_lm coefficients of (masked and weighted) map1
+   NO desactivates output of the alm
+   YES activates output of the alm into alm1.fits
+
+-alm2fileout [name|YES|NO](NO)
+   FITS file containing a_lm coefficients of (masked and weighted) map2
+   NO desactivates output of the alm
+   YES activates output of the alm into alm1.fits
+
+-apodizesigma [dfloat|NO](NO)
+   scale factor in DEGREES of the correlation function tappering,
+   see option -apodizetype.
+   For better results, -apodizesigma should be close to -thetamax.
+   NO desactivates apodization.
+   NOTE : if noise subtraction is active (options -noisecorfile or
+   -noiseclfile), the input noise data are assumed to be already apodized.
+
+-apodizetype [int](0)
+   type of apodization
+   0: the correlation function is multiplied by a gaussian window
+      (equal to 1    at theta=0,
+       equal to 0.5  at theta= -apodizesigma/2,
+       equal to 1/16 at theta= -apodizesigma).
+   1: the correlation function is multiplied by a cosine window 
+      (equal to 1   at theta=0,
+       equal to 0.5 at theta= -apodizesigma/2,
+       equal to 0   at theta= -apodizesigma).
+
+-beam [dfloat|NO](NO)
+   gaussian beam FWHM (arcmin) for map 1.
+   If specified, output c_l and c_theta are corrected for it
+   NOTE : if noise subtraction is active (options -noisecorfile or
+   -noiseclfile), the input noise data are assumed to be already corrected
+   for the beam
+
+-beam_file [name|NO](NO)
+   beam window function for map 1.
+   If specified, output c_l and c_theta are corrected for it
+   The file should be plain ASCII with 2 columns : l and B(l) 
+   or FITS (ASCII or BINARY) table containing B(l) starting at l=0
+   (B(l) is sqrt of beam power spectrum).
+   This over-rules the gaussian correction described by beam.
+   NO will not read any beam_file (but a gaussian
+      correction may be performed if -beam is set).
+   NOTE : if noise subtraction is active (options -noisecorfile or
+   -noiseclfile), the input noise data are assumed to be already corrected
+   for the beam.
+   Starting with version 2.90 and if linked with HEALPix 3.10+
+   file.fits[extname] means extension 'extname' of file.fits
+
+-beam2 [dfloat|NO](NO)
+   gaussian beam FWHM (arcmin) for map 2 (if applicable).
+   (see beam)
+  Note: if the second beam is the same as the first one,
+   then -beam2 should be explicitely given the same value as -beam
+
+-beam_file2 [name|NO](NO)
+   beam window function for map 2 (if applicable).
+   If specified, output c_l and c_theta are corrected for it
+   The file should be plain ASCII with 2 columns : l and B(l) 
+   or FITS (ASCII or BINARY) table containing B(l) starting at l=0
+   (B(l) is sqrt of beam power spectrum).
+   This over-rules the gaussian correction described by -beam2.
+   NO will not read any -beam_file2 (but a gaussian
+      correction may be performed if -beam2 is set.
+   NOTE : if noise subtraction is active (options -noisecorfile or
+   -noiseclfile), the input noise data are assumed to be already corrected
+   for the beam.
+  Note: if the second beam is the same as the first one,
+   then -beam_file2 should be explicitely given the same value as -beam_file
+
+-clfile [name|YES|NO](NO)
+   name of output file for Cl
+   YES activates Cl file output with name spice.cl
+   NO desactivates output of Cl file
+   NOTE : the current format of this file is a two columns array
+   the first one corresponding to the value of l, the second one
+   to the temperature Cl and, if polarization is activated, five
+   additional spectra corresponding to EE, BB, TE, TB, EB 
+   and optionally ET, BT, BE are also written.
+
+-cl_inmap_file [name|YES|NO](NO)
+   name of input file containing the raw Cls of the map as obtained by
+   running previously SpICE with the option -cl_outmap_file.
+   If this option is active, it is not necessary anymore to read the input
+   map file, and option -cl_outmap_file is of course inactive.
+   YES reads the map raw Cls from file spice.clrawmap
+   NO computes the raw Cl directly from the map.
+   IMPORTANT NOTE : the cls computed that way can be affected by the nature
+      of the masks and/or the weights. If the masks/weights are changed,
+      the calculation will become inconsistent.
+
+-cl_inmask_file [name|YES|NO](NO)
+   name of input file containing the raw Cl of the weight/masks as
+   obtained by running previously SpICE with the option -cl_outmask_file.
+   If option -cl_inmask_file is active, the Cls of the masks are not computed,
+   they are directly read in file specified by cl_inmask_file and option
+   -cl_outmask_file is of course inactive.
+   With option -cl_inmask_file active, it is in principle not necessary
+   to read masks nor weights, but if masks/weights are not read, it means
+   that the input map is supposed to have been processed prior to using spice,
+   i.e. it has been multiplied by the masks/weights already.
+   YES reads the weights/mask raw Cls from file spice.clrawmasks
+   NO computes the raw Cl directly from the weights/masks.
+   IMPORTANT NOTE : the cls computed for the map are affected by the nature
+      of the masks and/or the weights. If the masks/weights are changed,
+      the calculation will become inconsistent.
+
+-cl_outmap_file [name|YES|NO](NO)
+   name of output file containing the raw Cls of the map. This can be
+   convenient in order to run SpICE with different parameters, without
+   having to recompute these raw Cls.
+   YES activates map raw Cls output with name spice.clrawmap
+   NO desactivates output of map raw Cls file.
+
+-cl_outmask_file [name|YES|NO](NO)
+   name of output file containing the raw Cls of the weights/masks.
+   This can be convenient in order to run SpICE with different parameters,
+   without having to recompute these raw Cls.
+   YES activates mask raw Cls output with name spice.clrawmasks
+   NO desactivates output of mask raw Cls file.
+
+-corfile [name|YES|NO](NO)
+   name of output correlation file
+   YES activates correlation file output with name spice.cor
+   NO desactivates output of correlation file
+   NOTE : the current format of this file is a three columns array
+   the first one corresponding to the separation theta in radians
+   the second one to cos(theta), the third one to the correlation
+   function of the temperature and, if polarization is activated,
+   five additional columns are written, corresponding respectively to
+   QQ, UU, TQ, TU and QU in the coupled case and to EE, BB, TQ, TU and QU
+   in the decoupled case (see option -decouple and -symmetric_cl).
+
+-covfileout [name|YES|NO](NO)
+   Computes and ouputs the TT C(l) covariance matrices 
+     These matrices are not needed by the code and are provided for 
+   eg, cosmological interpretation of the result.
+   YES activates output of the cov. matrices in default
+      FITS file spice.covariance
+   NO desactivates output of the matrices
+
+-decouple [YES|NO](NO)
+   computes the decoupled correlation functions
+   by an integral over QQ and UU correlation functions in angle space.
+   NOTE : this option is active only if -polarization=YES,
+   otherwise it is ignored (see also -tolerance).
+   YES activates decoupling :
+      Correlation functions computed are : TT, EE, BB, TQ, TU, QU, (QT, UT, UQ)
+      Cls computed are : TT, EE, BB, TE, TB, EB, (ET, BT, BE) 
+      with no mixing between EE and BB
+   NO desactivates decoupling :
+      Correlation functions computed are : TT, QQ, UU, TQ, TU, QU, (QT, UT, UQ)
+      Cls computed are : TT, EE, BB, TE, TB, EB, (ET, BT, BE) 
+      with coupling between EE and BB
+ 
+    In both cases, the TE (and TB) estimators are unbiased using window functions (see
+      options -tenormfilein, -tenormfileout, -windowfilein, -windowfileout).
+
+-dry [YES|NO](NO)
+   This unsafe option allows reading partly corrupted files, i.e. with
+   incomplete headers. However the size of the fits file must be correct,
+   i.e. it must correspond to a full sky map with 12*nside^2 pixels.
+
+-extramapfile [name|NO](NO)
+   name of the (optional) extra input map file (healpix SP fits file)
+   to be added to mapfile before analysis. 
+   Must be in the some Coordinates, Nside and Units as mapfile
+   (ordering can be different).
+
+-extramapfile2 [name|NO](NO)
+   name of the (optional) extra input map file (healpix SP fits file)
+   to be added to mapfile2 before analysis. 
+   Must be in the some Coordinates, Nside and Units as mapfile2
+   (ordering can be different).
+
+-fits_out [YES|NO](NO)
+   If set, the Cl and correlation (-clfile, -corfile, -cl_outmap_file, -cl_outmask_file)
+   are written in FITS Ascii files, instead of plain text files.
+   This does not affect the input Cl files (-cl_inmap_file and -cl_inmask_file),
+   which will be read whatever is their format.
+
+-help
+   print this message and stop
+
+-history
+   print history of the program and stop
+
+-kernelsfileout [name|YES|NO](NO)
+   Compute and ouput the 4 kernels, each of size (lmax+1)*(2*lmax+1),
+   relating the Spice (polarized) estimator to the 'true' underlying CMB spectra.
+     These kernels are not needed by the code and are provided for 
+   eg, cosmological interpretation of the result.
+     Note that these kernels depend on the choice
+   of apodization (options -apodizetype and -apodizesigma) 
+   and on -thetamax and -nlmax.
+     How to use them depends on the -decouple option 
+   (see the FITS file header for more information).
+     This option is inactive if option -windowfilein is active.
+   YES activates output of the kernels in default
+      FITS file spice.kernels
+   NO desactivates output of the kernels
+
+-listmapfiles1_K [name|NO](NO)
+   with K integer in [1, 10]
+   list of map files to be combined with weights -listmapweights1_K
+   to form the first map to analyze.
+   If this option is set, -mapfile (and -extramapfile) are ignored
+
+-listmapfiles2_K [name|NO](NO)
+   with K integer in [1, 10]
+   list of map files to be combined with weights -listmapweights2_K
+   to form the optional second map to cross-correlate with the first one.
+   If this option is set, -mapfile2 (and -extramapfile2) are ignored
+
+-listmapweights1_K [dfloat|NO](1.0)
+   with K integer in [1, 10]
+   list of weights to be applied to -listmapfiles1_K above
+   to form the first map to analyze.
+   m1 = w1(1) * m1(1) + w1(2) * m1(2) + ... 
+
+-listmapweights2_K [dfloat|NO](1.0)
+   with K integer in [1, 10]
+   list of weights to be applied to -listmapfiles2_K above
+   to form the second optional map to analyze.
+   m2 = w2(1) * m2(1) + w2(2) * m2(2) + ... 
+
+-mapfile [name|YES](YES)
+   name of the input map file (healpix SP fits file)
+   YES is equivalent to take input file map.fits
+   Starting with version 2.90 and if linked with HEALPix 3.10+
+   file.fits[extname] means extension 'extname' of file.fits
+
+-mapfile2 [name|YES|NO](NO)
+   name of the second (optional) input map file (healpix SP fits file)
+   to cross-correlate with the first one (-mapfile)
+   If provided, ONLY cross-correlation is performed (no auto-correlation)
+   YES is equivalent to take input file map2.fits
+   NO turns off map-map cross-correlation
+
+-maskfile [name|YES|NO](NO)
+   name of the input mask file (healpix SP fits file)
+   A mask file is composed of zeros (masked) and ones (in)
+   YES activates maskfile with name mask.fits
+   NO desactivates -maskfile
+   Starting with version 2.90 and if linked with HEALPix 3.10+
+   file.fits[extname] means extension 'extname' of file.fits
+
+-maskfile2 [name|YES|NO](NO)
+   name of the input mask file (healpix SP fits file)
+   to be applied to the second map
+   YES activates -maskfile2 with name mask2.fits
+   NO desactivates -maskfile2
+ Notes:
+  1) if the you want the 2nd mask to be the same as the 1st one, 
+    set -maskfile2 to the same name as -maskfile
+  2) the 2 masks should overlap at least partially
+
+-maskfilep [name|YES](YES)
+   name of the input mask file (healpix SP fits file)
+   to be applied to polarization.
+   By default, it is the same as -maskfile
+   Ignored if polarization is set to NO
+
+-maskfilep2 [name|YES](YES)
+   name of the input mask file (healpix SP fits file)
+   to be applied to the second map polarization
+   By default, it is the same as -maskfile2
+   Ignored if polarization is set to NO
+
+-nlmax [integer](3*Nside-1)
+   value of the largest multipole used in the analysis.
+   The default is 3*Nside-1, where Nside is the Healpix resolution parameter 
+   of the map being analyzed.
+   Any value larger than 3*Nside-1 or <= 0 will be replaced by the default.
+
+-noiseclfile [name|YES|NO](NO)
+   name of input file for Cls of the noise
+   if -noiseclfile is specified, noise subtraction is applied
+   to both final Cls and correlation function (unless -noisecorfile is
+   specified for the latter)
+   YES activates noise subtraction from file noise.cl
+   NO desactivates noise subtraction from a Cl noise file
+
+-noisecorfile [name|YES|NO](NO)
+   name of input file for correlation function of the noise
+   if -noisecorfile is specified, noise subtraction is applied
+   to both final correlation function and Cls (unless -noiseclfile is
+   specified for the latter)
+   YES activates noise subtraction from file noise.cor
+   NO desactivates noise subtraction from a correlation noise file
+
+-normfac [dfloat|NO](NO)
+   normalization factor. If normfac is specified, the correlation
+   function and the Cls are multiplied by normfac**2
+   NO and -normfac=1.0 are equivalent : in that case
+   normalization is inactive to save calculations.
+   NOTE : if noise subtraction is active (options -noisecorfile or
+   -noiseclfile), the input noise data are assumed to be already
+   normalized appropriately
+
+-optinfile [name|YES|NO](NO)
+   Read the options in an file (only those which are not specified
+   interactively are taken into account).
+   YES reads default input option file .spicerc
+   NO desactivates the reading.
+   NOTE 1 : The file containing the options is a 2-column file,
+   the first column corresponds to the option (without the "-" at the
+   beginning) and the second column to the parameter (see below for
+   an example).
+   NOTE 2 : It is not necessary to specify all the options in this
+   file, and the order in which they appear does not matter. If an
+   option is specified neither in the option file nor interactively,
+   then the default value is assumed for this option.
+
+-optoutfile [name|YES|NO](NO)
+   Output the options in an file (read with option -optinfile or specified
+   interactively. In that case, no calculation is performed, only the
+   file containing the options is created.
+   YES output option file with default name .spicerc
+   NO desactivates the output
+   NOTE : see note of -optinfile.
+
+-overwrite [YES|NO](YES)
+   Activates overwriting for all output files.
+   YES overwrite all the output files generated previously.
+   NO checks if any of the output files already exist. If it is the
+   case, SpICE stops without mercy.
+   To have more sophisticated handling of overwriting, the standard
+   Healpix syntax can be used : file names in the form !name means
+   that the name of the file to be used is name and the "!" explicitely allows
+   overwriting.
+
+-pixelfile [name|YES|NO](NO)
+   name of input pixel correction file for 1st map
+   YES activates pixel window correction with file 
+   ${HEALPIXDATA}/pixel_window_nxxxx.fits
+   or
+   ${HEALPIX}/data/pixel_window_nxxxx.fits
+   where xxxx corresponds to the value of nside of input map file.
+   NO desactivates pixel window correction.
+   NOTE : if noise subtraction is active (options -noisecorfile or
+   -noiseclfile), the input noise data are assumed to be already corrected
+   for pixel window
+
+-pixelfile2 [name|YES|NO](pixelfile)
+   name of input pixel correction file for 2nd map (for cross-analysis)
+ Default value is the one chosen for -pixelfile.
+ If set to YES explicitly, or implicitly via -pixelfile, 
+ the standard pixel window function adapted to the 2nd map Nside will be used.
+ It must be set to NO to prevent pixel correction of 2nd map.
+
+-polarization [YES|NO](NO)
+   to compute polarized power spectra/correlation functions
+   in addition to standard temperature Cls/correlation
+   function. The input map file is supposed to be in the standard
+   polarized Healpix fits format, so it contains 3 maps (T,Q,U)
+   instead of one.
+   The polarized Cls and correlation functions computed depend on the
+   choice of parameter decouple explained below (see option -decouple).
+
+-subav [YES|NO](NO)
+   in case the input map is expected to have an offset, its (weighted)
+   average can be subtracted from it prior to the calculations,
+   in order to insure zero average.
+   When there are masks/weights, W(i), this average is computed
+   simply as [sum_i W(i) map(i)]/[sum_i W(i)].
+   See options -maskfile, -weightfile, -weightpower for more information
+   on the masks/weights.
+   It is important to notice that the estimator of the correlation function
+   or the Cls is not expected anymore to be unbiased if option -subav
+   is active. It would be the case only if the offset would be exactly
+   known and not estimated directly from the data.
+   YES activates average subtraction.
+   NO desactivates average subtraction.
+
+-subdipole [YES|NO](NO)
+   the best fit monopole and dipole will regressed out from the
+   (masked and weighted) data before spectral analysis. 
+   YES activates dipole and monopole subtraction.
+   NO desactivates dipole and monopole subtraction.
+   -subdipole=YES implies -subav=YES and has the same caveats.
+
+-symmetric_cl [YES|NO](NO)
+   by default, when 2 maps are provided, and -polarization is set,
+   cross spectra such as TE are defined as T_map1 * E_map2 
+  (in which case it is recommended to use the least noisy map as map2)
+   and 9 spectra are produced.
+   If -symmetric_cl is set to YES, then
+   TE = (T_map1 * E_map2 + T_map2 * E_map1)/2
+   and 6 spectra are produced.
+  In the single map case, TE=ET and only 6 spectra are produced.
+
+-tenormfilein [name|YES|NO](NO)
+   this option is ignored if -polarization is not active :
+   reads the normalisation function needed to compute correctly the TE (and TB) spectra
+   and correlation functions, instead of computing it. 
+   The calculation of this term depends on the apodization chosen 
+   (options -apodizetype and -apodizesigma).
+   YES activates input of the normalisation function with default
+      input file name spice.tenorm
+   NO desactivates input of the normalisation function : it is computed
+      on run time.
+
+-tenormfileout [name|YES|NO](NO)
+   Compute and ouput the normalisation function needed to compute the  
+   TE (and TB) spectra. Note that this function depends on the choice
+    of apodization (options -apodizetype and -apodizesigma).
+   This option is inactive, of course, if option -tenormfilein is active, or
+   if option -polarization is inactive.
+   YES activates output of the normalisation function in default
+      file spice.tenorm
+   NO desactivates output of the normalisation function (but it is
+      computed if needed).
+
+-tf_file [name|NO](NO)
+   name of the input tranfer function file.
+   The output C(l) will be divided by the transfer function(s) read
+   from this file.
+   The transfer function is defined as the ratio of 2 power spectra.
+   The file should have the same format as the C(l) produced by this code.
+
+-thetamax [dfloat|NO](NO)
+   maximum value of angle theta used in the integrals to compute the
+   power spectra from the correlation functions.
+   NO desactivates upper bound (sets it to 180 degrees).
+
+-tolerance [dfloat|NO](NO)
+   relative tolerance on convergence of QQ and UU integrals (see -decouple)
+   Active only when -decouple is set
+   Smaller values give more accurate EE and BB spectra, in longer times.
+   NO leaves it to its default value (1.e-5).
+
+-usage
+   print short usage reminder
+
+-verbosity [0|1|2|YES|NO](1)
+   verbose option :
+   0 or NO : no verbose
+   1 or YES : standard verbose
+   2 : full verbose
+
+-version
+   prints version number and exits
+
+-weightfile [name|YES|NO](NO)
+   name of the input weight file (healpix SP fits file)
+   Weights should be always positive or equal to zero.
+   If masks are present, weights are multiplied by the masks.
+   If masks are not present, weights are supposed to be already masked,
+   i.e. are equal to zero for masked pixels
+   YES activates -weightfile with name weight.fits
+   NO desactivates -weightfile
+
+-weightfile2 [name|YES|NO](NO)
+   name of the input weight file (healpix SP fits file)
+   to be applied to the second map
+   YES activates -weightfile2 with name weight2.fits
+   NO desactivates -weightfile2
+
+-weightfilep [name|YES](YES)
+   name of the input weight file (healpix SP fits file)
+   to be applied to polarization (Q and U Stokes parameters).
+   By default, it is the same as -weightfile
+   Ignored if polarization is set to NO
+
+-weightfilep2 [name|YES](YES)
+   name of the input weight file (healpix SP fits file)
+   to be applied to the second map polarization
+   By default, it is the same as -weightfile2
+   Ignored if polarization is set to NO
+
+-weightpower [dfloat|NO](1.0)
+   the weights are taken to this power.
+   if -weightpower = 0.0, the weights are transformed into pure masks
+   if -weightpower < 0.0, only the non zero values of the weights are
+   modified.
+   NO is equivalent to -weightpower=1.0.
+
+-weightpower2 [dfloat|NO](1.0)
+   the weights of the second map are taken to this power.
+   NO is equivalent to -weightpower2=1.0.
+
+-weightpowerp [dfloat|YES](YES)
+   the weights applied to 1st map (Q,U) are taken to this power.
+   Default: same as 1st Temperature weight power (see -weightpower)
+
+-weightpowerp2 [dfloat|YES](YES)
+   the weights applied to 2nd map (Q,U) are taken to this power.
+   Default: same as 2nd Temperature weight power (see -weightpower2)
+
+-windowfilein [name|YES|NO](NO)
+   this option is ignored if polarization is not active :
+   reads the kcross term needed to compute correctly the TE (and TB) spectra
+   and correlation functions, instead of computing it. 
+   The calculation of this term depends on the apodization chosen 
+   (options -apodizetype and -apodizesigma).
+   YES activates input of the window function with default
+      input file name spice.window
+   NO desactivates input of the window function : it is computed
+      on run time.
+
+-windowfileout [name|YES|NO](NO)
+   Compute and ouput the kcross term needed to compute the  
+   TE (and TB) spectra. Note that this kcross term depends on the choice
+    of apodization (options -apodizetype and -apodizesigma).
+   This option is inactive, of course, if option -windowfilein is active, or
+   if option -polarization is inactive.
+   YES activates output of the window function in default
+      file spice.window
+   NO desactivates output of the window function (but it is
+      computed if needed).
+
+
+IMPORTANT NOTE
+
+The order of the operations is not the same whether mask/weights are present
+or not.
+
+If there is no mask/weight, spice is nearly equivalent to anafast, and
+the order of operations is the following :
+   (1a) map average subtraction, if required
+   (2a) calculation of Cl
+   (3a) pixel window correction, beam correction, transfer function correction,
+       renormalization, if required
+   (4a) calculation of the 2pt correlation function, xi, if needed
+   (5a) apodization of xi and calculation of the final Cl, if  needed
+   (6a) subtraction of noise bias on Cl and/or xi, if applicable
+
+If there is any mask/weight, the order of operations is the following
+   (1b) multiplication of the map by the masks/weights
+   (2b) subtraction of the (weighted) average
+   (3b) calculation of the Cl of the map and of the masks/weights
+   (4b) calculation of the correlation function of the map and of the
+       masks/weights, and the corresponding ratio, xi
+   (5b) decoupling if needed (polarization case)
+   (6b) apodization of xi, if required
+   (7b) renormalization, if required
+   (8b) calculation of Cl from xi, if needed
+   (9b) pixel window correction, beam correction, transfer function correction,
+       if required, to obtain the final Cl
+  (10b) calculation of final xi, if needed
+  (11b) subtraction of noise bias on Cl and/or xi, if applicable
+
+Note, therefore, that if there are masks/weights, beam correction and
+pixel window correction are performed AFTER apodization, at variance with
+the case without mask/weight. Such ordering in the procedure is expected
+to introduce a small bias in the final results. Ideally, beam and pixel
+window correction should be performed before apodization, but this is
+possible only prior to masking/weighting on a FULL SKY map, i.e. before
+operation (1b).
+
+EXAMPLES
+
+spice
+spice -mapfile YES -corfile YES -clfile YES
+   reads default input map, computes correlation function
+   and Cl and output them on default output files
+   no masks/weights are taken into account
+
+spice -mapfile mymap.fits -weightfile weights.fits -clfile NO
+   reads input map mymap.fits, input file weights.fits for weights,
+   output correlation functions only
+
+spice -mapfile mymap.fits -maskfile mymasks.fits 
+      -weightfile myweights.fits -beam 18.d0
+   reads input map mymap.fits, input mask file mymasks.fits,
+   input weight file myweights.fits, computes Cl and
+   correlation function with correction for a beam of
+   18 arcmin, output them on default output files. If both
+   mask and weight files are specified, the weights are
+   multiplied by the masks, allowing one to read a full unmasked
+   weight file
+
+spice -mapfile mymap.fits -weightfile myweights.fits  
+      -noisecorfile mynoise.cor -noiseclfile mynoise.cl
+   reads input map mymap.fits, input weight file myweights.fits,
+   computes Cls and correlation function, subtracts from Cls
+   the Cls of the noise from file mynoise.cl, subtracts from
+   the correlation function the correlation function of the noise
+   from mynoise.cor, output the results for the Cls and the
+   correlation function on default output files.
+   Since only the weights are specified, they are supposed
+   to be appropriately masked.
+   Even if only one noise file is specified, either from the
+   option -noisecorfile or from the option -noiseclfile,
+   noise correction is applied to both Cls and the the
+   correlation function. But this latter way is less accurate
+   because of the supplementary Legendre transform it involves.
+
+spice -mapfile mymap.fits -polarization YES \ 
+      -maskfile mymasks.fits
+   reads multiple input mapfile mymap.fits (T,Q,U), computes
+   the temperature and polarization Cls (TT, GG, CC, TG, TC and GC) and
+   correlation functions (TT, QQ, UU, TQ, TU, QU), and writes the
+   results in default output files. All the calculations use
+   appropriate mask corrections.
+
+spice -optinfile YES
+spice -optinfile .spicerc
+   Read options and parameters in default file .spicerc
+   and run spice accordingly.
+
+EXAMPLE OF OPTIONS INPUT FILE (.spicerc) :
+alm1fileout = NO
+alm2fileout = NO
+apodizesigma = NO
+apodizetype = NO
+beam = NO
+beam_file = NO
+beam2 = NO
+beam_file2 = NO
+clfile = NO
+cl_outmap_file = NO
+cl_inmap_file = NO
+cl_outmask_file = NO
+cl_inmask_file = NO
+corfile = NO
+covfileout = NO
+decouple = NO
+dry = NO
+extramapfile = NO
+extramapfile2 = NO
+fits_out = NO
+kernelsfileout = NO
+listmapfiles1_1 = NO
+listmapfiles1_2 = NO
+listmapfiles1_3 = NO
+listmapfiles1_4 = NO
+listmapfiles1_5 = NO
+listmapfiles1_6 = NO
+listmapfiles1_7 = NO
+listmapfiles1_8 = NO
+listmapfiles1_9 = NO
+listmapfiles1_10 = NO
+listmapfiles2_1 = NO
+listmapfiles2_2 = NO
+listmapfiles2_3 = NO
+listmapfiles2_4 = NO
+listmapfiles2_5 = NO
+listmapfiles2_6 = NO
+listmapfiles2_7 = NO
+listmapfiles2_8 = NO
+listmapfiles2_9 = NO
+listmapfiles2_10 = NO
+listmapweights1_1 =    1.00000000000000
+listmapweights1_2 =    1.00000000000000
+listmapweights1_3 =    1.00000000000000
+listmapweights1_4 =    1.00000000000000
+listmapweights1_5 =    1.00000000000000
+listmapweights1_6 =    1.00000000000000
+listmapweights1_7 =    1.00000000000000
+listmapweights1_8 =    1.00000000000000
+listmapweights1_9 =    1.00000000000000
+listmapweights1_10 =    1.00000000000000
+listmapweights2_1 =    1.00000000000000
+listmapweights2_2 =    1.00000000000000
+listmapweights2_3 =    1.00000000000000
+listmapweights2_4 =    1.00000000000000
+listmapweights2_5 =    1.00000000000000
+listmapweights2_6 =    1.00000000000000
+listmapweights2_7 =    1.00000000000000
+listmapweights2_8 =    1.00000000000000
+listmapweights2_9 =    1.00000000000000
+listmapweights2_10 =    1.00000000000000
+mapfile = map.fits
+mapfile2 = NO
+maskfile = NO
+maskfile2 = NO
+maskfilep = YES
+maskfilep2 = YES
+nlmax = NO
+normfac = NO
+npairsthreshold = NO
+noisecorfile = NO
+noiseclfile = NO
+overwrite = YES
+pixelfile = NO
+pixelfile2 = NO
+polarization = NO
+subav = NO
+subdipole = NO
+symmetric_cl = NO
+tenormfilein = NO
+tenormfileout = NO
+tf_file = NO
+thetamax = NO
+tolerance = NO
+verbosity = 1
+weightfile = NO
+weightfilep = YES
+weightfile2 = NO
+weightfilep2 = YES
+weightpower =    1.00000000000000
+weightpower2 =    1.00000000000000
+weightpowerp =    1.00000000000000
+weightpowerp2 =    1.00000000000000
+windowfilein = NO
+windowfileout = NO
+

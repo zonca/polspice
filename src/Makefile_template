@@ -1,0 +1,149 @@
+#
+# Makefile to customize for your system
+#
+# system variable HEALPIX must be defined for compilation
+#  and at run time
+#
+# set DOUBLE = 1 for Double Precision alm calculation (more accurate, larger memory foot-print), 
+# DOUBLE = 0 for Single Precision (see INSTALL)
+#
+# If the command pkg-config is available on your system, fill the corresponding part below,
+# if not, set USEPKGCONFIG to 0 and fill the corresponding part.
+# *****************************************************
+USEPKGCONFIG := 1
+ifeq ($(USEPKGCONFIG),1)
+#-----------
+# fill the following part if pkgconfig is available on your system
+#-----------
+FC      =        # F90 compiler, same as Healpix as much as possible
+CC      =        # C compiler
+SUFF    =
+PKGCONF = $(HEALPIX)/lib$(SUFF)/pkgconfig/healpix.pc # location of Healpix f90 pkgconfig file
+OTHERLIBS = # other libs to link (leaving it empty should be OK)
+#
+FCFLAGS := -O3 $(shell pkg-config --cflags-only-other $(PKGCONF)) # same options as Healpix f90
+INC     := -I. $(shell pkg-config --cflags-only-I     $(PKGCONF)) # Healpix include files
+LIBS    :=     $(shell pkg-config --libs              $(PKGCONF)) $(OTHERLIBS) # Healpix library + libsharp + libcfitsio + any_other_lib
+CINC    := -I. -I$(HEALPIX)/include
+else
+#-----------
+# fill the following part if pkgconfig is NOT available
+#-----------
+FC      =               # F90 compiler, same as Healpix as much as possible
+FCFLAGS =  		# F90 compiler options, same as Healpix as much as possible
+CC      =               # C compiler
+FITSLIB =  		# cfitsio library location (directory)
+SUFF    =		# Healpix f90 include and lib suffix
+HPXINC  = $(HEALPIX)/include$(SUFF)  # Healpix f90 include files location
+HPXLIB  = $(HEALPIX)/lib$(SUFF)      # Healpix f90 library location
+OTHERLIBS =  -lcurl  -L$(HEALPIX)/lib -lsharp # other libs to link (eg -lcurl for cfitsio >= 3.42 and -lsharp for Healpix >= 3.60)
+#
+INC     := -I. -I$(HPXINC)
+LIBS    :=     -L$(HPXLIB) -lhealpix -L$(FITSLIB) -lcfitsio $(OTHERLIBS)
+CINC    := -I. -I$(HEALPIX)/include
+endif
+#-----------
+# end of user edited part
+#-----------
+DOUBLE ?= 1
+EXEC   ?= spice
+PREC    = -DDOUBLE=$(DOUBLE)
+MAKE   ?= make
+#
+#
+# ***********************************************************
+#   Do not edit what is below this line
+# ***********************************************************
+#
+# for recent GNU make (>3.80)
+.DEFAULT_GOAL := all
+# for old GNU make (<=3.80)
+.PHONY: default
+default: all
+
+all:	$(EXEC)
+
+PARENT = $(shell cd .. ; pwd)
+BLD := $(PARENT)/build
+SRC := $(PARENT)/src
+BIN := $(PARENT)/bin
+
+OPARAMS = $(BLD)/spice_parameters.o
+OCOMMON = $(BLD)/spice_common.o
+O1      = $(addprefix $(BLD)/, apodize_mod.o convert_to_ascii.o do_legendre.o fits_spice.o rec3jj.o rec3jjcmb.o remove_dipole_mod.o sets.o sharp_f_interface.o sharp_interface.o )
+O2      = $(addprefix $(BLD)/, alm_type.o compute_windows.o map_type.o )
+O3      = $(BLD)/deal_with_xi_and_cl.o
+O4      = $(BLD)/cumul2.o
+O5      = $(BLD)/spice_subs.o
+O6      = $(addprefix $(BLD)/, deal_with_filenames.o deal_with_files.o deal_with_options.o )
+TOP     = $(BLD)/spice.o
+
+OBJS = $(OPARAMS) $(OCOMMON) $(O1)  $(O2)  $(O3)  $(O4)  $(O5)  $(O6) 
+
+# dependencies (required when used with make -j)
+$(OCOMMON):	$(OPARAMS)
+$(O1):			$(OCOMMON)
+$(O2):			$(OCOMMON) $(O1)
+$(O3):			$(OCOMMON) $(O2)
+$(O4):			$(OCOMMON) $(O1)
+$(O5):			$(OCOMMON) $(O3) $(O4)
+$(O6):			$(OCOMMON) $(O1) $(O2)
+$(TOP):			$(OCOMMON) $(O5) $(O6)
+
+#-----------------------------------------------------------
+
+$(BLD):
+	@mkdir -p $(BLD)
+
+$(BIN):
+	@mkdir -p $(BIN)
+
+$(EXEC):	$(BLD)  $(BIN)           $(OBJS) $(TOP)
+	@echo " "
+	@echo " * Compiling executable $@"
+	$(FC) $(FCFLAGS) $(PREC) $(OBJS) $(TOP) -o $(BLD)/$@ $(LIBS)
+	@echo " "
+	@echo " * Copying $@ in $(BIN)"
+	@cp -p $(BLD)/$@  $(BIN)
+	@echo " * Copying IDL and Python files in $(BIN)"
+	@cp -p *.pro *.py $(BIN)
+
+doc:	$(EXEC)
+	@echo " * Generating ../README and ../HISTORY"
+	@$(BIN)/$(EXEC)  -help   | grep -v '==>' > ../README
+	@$(BIN)/$(EXEC) -history | grep -v '==>' > ../HISTORY
+
+clean:
+	@echo " * Cleaning up $(BLD)"
+	@#rm -f *.o *.d *.mod $(EXEC)
+	@rm -rf $(BLD)
+
+vclean: clean
+
+tidy:  clean
+	@echo " * Cleaning up $(BIN)"
+	@rm -rf $(BIN)
+
+both:
+	@echo " **** Generating Double Precision code (spice_DP)"
+	$(MAKE) clean ; $(MAKE) DOUBLE=1 EXEC=spice_DP all
+	@echo " ========================================"
+	@echo " **** Generating Single Precision code (spice_SP)"
+	$(MAKE) clean ; $(MAKE) DOUBLE=0 EXEC=spice_SP all
+	@echo " "
+	@echo "       spice_SP and spice_DP now available "
+
+.SUFFIXES:
+.SUFFIXES: .F90 .f90 .o .c 
+
+$(BLD)/%.o :  %.f90
+	@echo " * Compiling $<"
+	@cd $(BLD) ; $(FC) $(FCFLAGS) $(PREC) $(INC) -c $(SRC)/$< -o $@
+
+$(BLD)/%.o:   %.F90
+	@echo " * Compiling $<"
+	@cd $(BLD) ; $(FC) $(FCFLAGS) $(PREC) $(INC) -c $(SRC)/$< -o $@
+
+$(BLD)/%.o :  %.c
+	@echo " * Compiling $<"
+	@cd $(BLD) ; $(CC) $(CINC) -c $(SRC)/$< -o $@

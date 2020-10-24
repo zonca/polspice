@@ -1,0 +1,233 @@
+HISTORY :
++++++++++
+
+UNPOLARIZED SPICE :
+
+07/01/01/SP&IS       : version 0.0
+                       - Basic version of the code, xi and Cl
+07/15/01/SC&SP&IS    : version 0.1
+                       - Improve input/output
+                       - Build friendly interface
+                       - pixel window and beam window correction
+11/16/01/SC&SP       : version 0.2
+                       - add pair count thresholding, option
+                         npairsthreshold
+                       - add apodizationg of the 2pt correlation
+                         function, option apodizesigma
+                       - add unsafe reading option, option dry
+22/05/02/SC&SP       : version 1.0
+                       - correct for a bug : the average from
+                         the whole map was always subtracted
+                         from it. Instead, an option subav
+                         is added, where there the (weighted)
+                         average is subtracted from the map
+                         if required
+07/06/02/SC&SP       : version 1.01
+                       - correct for a bug in the handling
+                         of the flags coroutput, apodize,
+                         verbose and megaverbose in subroutine
+                         compute.
+                       - correct for a bug in the wrapper
+                         normfac option was here twice.
+
+POLARIZED SPICE :
+
+01/04/02/SC&EH&SP&IS : version 2.0
+                       - add option polarization to compute
+                         polarization Cls and correlation functions
+07/06/02/EH&SP       : version 2.01
+                       - add decouple option to compute pure
+                         E and B modes correlation functions
+                         and power spectra
+07/06/02/SC&SP       : version 2.02
+                       - clean up wrapper.
+07/03/03/EH          : version 2.1
+                       - increase compatibility with Healpix 1.20
+                       - introduce nlmax, beam_file, apodizetype
+10/15/04/SC&SP       : version 2.2
+                       - clean up the code
+                       - introduce cl_outmap_file, cl_inmap_file,
+                         cl_outmask_file, cl_inmask_file,
+                         windowfileout, windowfilein.
+                       - PIOLIB compatibility              [Planck]
+12/04/06/EH&SP       : version 2.21
+                        - bug correction in pointer boundaries
+                        - bug correction in PIOLIB output   [Planck]
+                        - slight edition of documentation (about noise)
+05/10/06/EH          : version 2.22
+                        - maps cross-correlation
+??      /EH          : version 2.30
+                        - different beam for each map
+02/02/07/EH          : version 2.40
+                        - fixed default behavior of second beam option
+                        - reorganized help message
+2007-03-08/EH        : version 2.45
+                        - first stab at PIE-ization        [Planck]
+                        - allow different mask for I and (Q,U)
+2007-04-04/EH        : version 2.46
+                        - simpler ASCII output format for g95
+                        - accepts polarized cut sky maps
+                        - crashing bug correction in compute windows
+2007-04-18/EH        : version 2.47
+                        - some more bug correction (nmask=1 by default)
+2007-04-27/EH        : version 2.48
+                       - PIE-ization done                 [Planck]
+                        +++ Delouis test with thinC        [Planck]
+2007-04-27/EH        : version 2.49
+                       - bug correction in Legendre for x=-1
+2007-09-10/EH        : version 2.50
+                       - set bad pixels to 0                [Planck]
+                       - added fits_out for FITS C(l) output      
+                       - added version option                     
+2007-12-07/EH        : version 2.52
+                       - added transfer function                  
+                       - Healpix version 2.* or more is required  
+2007-12-27/EH        : version 2.53
+                       - correctly account for DMC beam file [Planck] 
+2008-02-29/EH        : version 2.54
+                       - copy run parameters in FITS header
+2008-04-23/EH        : version 2.55
+                       - allow for different weight files and powers 
+                        for temp. and pol. maps
+2008-05-29/EH        : version 2.560
+                       - compute TB and EB spectra
+2008-06-02/EH        : version 2.57
+                       - correct TB and EB from window functions, update documentation
+2008-07-01/EH        : version 2.57a
+                       - corrected QU correlation: QU_new = -2 * QU_old
+2008-08-25/EH        : version 2.57b
+                       - add subdipole option (-> corrects bug on monopole subtraction introduced in v2.55)
+2008-09-02/EH        : version 2.59
+                       - use DMCPIOSTRINGMAXLEN instead of hardcoded value [Planck]
+                       - automatic generation of IO routines with PIE [Planck]
+2008-09-11/EH        : version 2.60
+                       - compiles on CC-in2p3 [Planck]
+2008-10-01/EH        : version 2.61
+                       - correction of crashing bug when dealing with cl_inmask_file AND polarized mask
+2008-12-05/EH        : version 2.62
+                       - edited 3-J symbol routine (rec3jj.f90) to fix problem affecting large |m| values
+                         (not relevant for CMB polarization)
+2009-01-22/EH        : version 2.63
+                       - output C(l) in CL tuples [Planck]
+2009-01-23/EH        : version 2.63a
+                       - can turn code into library [Planck]
+                       - renormalize TE (and TB) in all cases, not only decoupling
+2009-01-29/EH        : version 2.64
+                       - compute and output kernels
+2009-02-02/EH        : version 2.65
+                       - deallocate global variables before exiting
+                       - output kernels in TAB3D objects [Planck]
+2009-02-17/EH        : version 2.66
+                       - some cleanup
+2009-03-23/EH        : version 2.66a
+                       - corrected typos in history
+2009-05-29/EH        : version 2.68
+                       - compiles on magique3 [Planck]
+2009-06-10/EH        : version 2.69
+                       - npairsthreshold removed (was actually not implemented)
+2010-03-12/EH        : version 2.70
+                       - started importing cov_temp (TT covariance matrix)
+2010-06-04/EH        : version 2.73
+                       - debugged TT covariance matrix
+2010-06-18/EH        : version 2.75
+                       - added symmetric_cl option
+2010-08-25/EH        : version 2.76
+                       - issues a warning if input maps contain NaN-valued pixels
+2011-01-31/EH        : version 2.80
+                       - public release
+2011-02-15/EH        : version 2.81
+                       - fixed bug with string keywords in FITS writing
+                       - split a very long line.
+2012-03-22/EH        : version 2.83
+                       - cosmetic changes [Planck]
+2012-05-25/EH        : version 2.84
+                       - minor bug and typo corrections
+                       - public release
+2012-07-13/EH        : version 2.85
+                       - parallel calculation of the C(l)xC(l) TT covariance matrix
+2012-11-26/EH        : version 2.86
+                       - correction of a bug preventing covariance calculation for single apodized map
+2013-03-29/EH        : version 2.90
+                       - makes use of CFTISIO Extended File Name features available
+                          in HEALPIX 3.10, allowing the reading of 
+                          arbitrary FITS extensions in beam_file*, mapfile* and maskfile*
+2013-10-07/EH        : version 2.91
+                       - better handling of discrepant masks for cross-maps TE within option symmetric_cl
+2014-04-03/EH        : version 3.00
+                       - added listmapfiles*_* and listmapweights*_* options to allow linear combination 
+                           of input maps
+                       - computes correctly cross-power spectrum of 2 maps when 
+                           the first one is masked or weighted (maskfile and/or weightfile are set),
+                           and the second one is not (maskfile2 and weightfile2 not set)
+                       - turned-off monopole and dipole removal on (Q,U) maps in mask (and weight) free cases
+                       - correct default value of extramap* in example parameter file (--help option)
+2014-04-08/EH        : version 3.01
+                       - correction of a bug introduced in 3.00 (for autospectra)
+2015-03-02/EH        : version 3.03
+                       - fix un-initialized map variables (creating problems at small Nsides)
+                       - all lines shorter than 132 characters (gfortran default limitation)
+2015-08-26/EH        : version 3.10
+                       - when 2 polarized maps are cross-correlated, 9 or 6 spectra are computed, 
+                            depending on SYMMETRIC_CL setting
+                       - introduced TOLERANCE keyword for E/B decoupling
+                       - minor bugs correction in keyword parsing
+                       - new python wrapper (ispice.py)
+                       - bug correction in IDL wrapper (ispice.pro)
+2015-10-01/EH        : version 3.13
+                       - add SUBDIPOL in output FITS header
+                       - replace rewind (ignored by some compilers) by close+open
+2015-10-08/EH        : version 3.14
+                       - fixed DMC specific bug in C(l) writing [Planck]
+2015-10-12/EH        : version 3.16   (v03-01-06)
+                       - fixed DMC specific bug in map name parsing [Planck]
+                       - fixed bug in listmapweights2
+                       - improved  ispice.pro  and ispice.py
+2016-08-09/EH        : version 3.20   (v03-02-00)
+                       - fixed error in reading cut sky polarized FITS files
+                       - improved  read_spice.pro  and ispice.py
+2016-12-01/EH        : version 3.30
+                       - introduced bin_llcl.py
+                       - first attempt at supporting correlation of maps 
+                             with discrepant pixel sizes (Nside)
+2017-02-21/EH        : version 3.31   (v03-03-01)
+                       - slight edits to documentation
+2017-04-05/EH        : version 3.32   (v03-03-02)
+                       - kernel calculation, relating the output C(l)s to the true ones,
+                         is now possible even when polarization is not set.
+2017-08-04/EH        : version 3.33   (v03-03-03)
+                       - more sensible trigger of kernel calculation
+                       - faster map2alm step by ignoring empty Healpix rings
+2017-08-10/EH        : version 3.34   (v03-03-04)
+                       - added tenormfilein and tenormfileout (smaller file size that windowfile*)
+2017-08-28/EH        : version 3.40   (v03-04-00)
+                       - faster calculation of kernels (and tenormfileout)
+2018-01-16/EH        : version 3.51   (v03-05-01)
+                       - support for double precision maps and alms
+                       - support for cmake 
+2019-06-06/EH        : version 3.52   (v03-05-02)
+                       - ispice.py runs in python 2 and 3 
+2019-12-20/EH        : version 3.61   (v03-06-01)
+                       - smaller memory footprint, in particular for cut-sky format input maps
+                         with fsky < 25%
+                       - requires HEALPix 3.60 or more
+2020-01-30/EH        : version 3.62   (v03-06-02)
+                       - fixed bug in reading of mask(s) and weight(s) for polarisation;
+                       - can read partial sky IQU FITS files as generated by healpy
+                       - improvements to ispice.py
+2020-02-04/EH        : version 3.64   (v03-06-04)
+                       - compliant with gfortran
+                       - debugging in mask and weight reading
+2020-04-08/EH        : version 3.65   (v03-06-05)
+                       - can mix full sky masks and partial sky maps
+2020-04-10/EH        : version 3.66   (v03-06-06)
+                       - debugged parsing of C(l) text files
+2020-05-22/EH        : version 3.67   (v03-06-07)
+                       - fixed segfault in ClCl covariance matrix,
+                       - added omp_num_threads, kernelsfileout, noiseclfile, noisecorfile
+                         and normfac to ispice.py
+2020-05-26/EH        : version 3.68   (v03-06-08)
+                       - make sure partial maps and masks are correctly sorted on pixel index
+2020-09-22/EH        : version 3.69   (v03-06-09)
+                       - allow dumping of alm of (masked and weighted) maps
+2020-10-16/EH        : version 3.70   (v03-07-00)
+                       - fixed parsing bugs
