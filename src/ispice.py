@@ -167,16 +167,14 @@ class tools(object):
         else:
             import os
             print ('Submitting job %s'%(str(jobid)))
-            precommand=""
-            if isinstance(exportEnviron, dict):
-                for k,v in exportEnviron.items():
-                    #precommand += "export %s=%s; "%(k,v)
-                    precommand += "%s=%s "%(k,v)
-            self.command = precommand + self.command
             print (self.command)
-            os.system(self.command)
-            # Linux: /usr/bin/time -f"Max memory: %M kbytes"
-    # -------------------------------------------
+            import subprocess
+            # Run spice in a shell and print standard output to the Python session
+            # `universal_newlines` interprets the output as text and encodes it properly
+            # `env` overrides the environment, so we need to get the current environment from `os.environ` and modify it with the exportEnviron dict
+            # `stderr.subprocess.STDOUT` makes sure that also stderr is printed
+            print(subprocess.check_output(self.command, universal_newlines=True, env=dict(os.environ, **exportEnviron), shell=True, stderr=subprocess.STDOUT))
+
     def inDMC(self):
         return self.inDMC
     
